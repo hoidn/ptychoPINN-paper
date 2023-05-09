@@ -105,8 +105,10 @@
 %% sample for unstructured abstract %%
 %%==================================%%
 
-\abstract{The phase problem of coherent diffractive imaging (CDI) is fundamental to lensless imaging in an array of scientific fields, ranging from X ray science to astronomy. Existing techniques for solving the phase problem rely on algorithms that are iterative and -- consequently -- slow, which greatly hampers their use in synchrotron and XFEL environments. Deep learning based approaches demonstrate impressive speedups at the expense of imaging quality and an onerous need for large amounts of labeled training data, but recent progress has largely solved these two weaknesses through \emph{unsupervised} deep learning (DL) methods that incorporate diffraction physics within the model (physics-informed neural networks: PINNs). In this work we introduce a new reconstruction approach using a representative CDI technique, ptychography. We extend the PINN concept by combining the diffraction forward map with a second physics-based constraint based on measurement overlaps. We also consider the previously-neglected effects of shot noise in the diffraction measurement and find that a corresponding negative log likelihood loss function, evaluated over the predictive pdf of photon counts, yields a much more robust model than conventional choices such as MAE or MSE. Our resulting approach, PtychoPINN, retains the intrinsic speed of DL-based reconstruction (1000-fold that of iterative solvers) while greatly improving upon the accuracy, resolution, and generalizability of prior state-of-the-art DL-based ptychographic reconstruction, with 3- to 10-fold reductions in reconstruction error.
-}
+%\abstract{The phase problem of coherent diffractive imaging (CDI) is fundamental to lensless imaging in an array of scientific fields, ranging from X ray science to astronomy. Existing techniques for solving the phase problem rely on algorithms that are iterative and -- consequently -- slow, which greatly hampers their use in synchrotron and XFEL environments. Deep learning based approaches demonstrate impressive speedups at the expense of imaging quality and an onerous need for large amounts of labeled training data, but recent progress has largely solved these two weaknesses through \emph{unsupervised} deep learning (DL) methods that incorporate diffraction physics within the model (physics-informed neural networks: PINNs). In this work we introduce a new reconstruction approach using a representative CDI technique, ptychography. We extend the PINN concept by combining the diffraction forward map with a second physics-based constraint based on measurement overlaps. We also consider the previously-neglected effects of shot noise in the diffraction measurement and find that a corresponding negative log likelihood loss function, evaluated over the predictive pdf of photon counts, yields a much more robust model than conventional choices such as MAE or MSE. Our resulting approach, PtychoPINN, retains the intrinsic speed of DL-based reconstruction (1000-fold that of iterative solvers) while greatly improving upon the accuracy, resolution, and generalizability of prior state-of-the-art DL-based ptychographic reconstruction, with 3- to 10-fold reductions in reconstruction error.  }
+
+\abstract{The phase problem of coherent diffractive imaging (CDI) is fundamental to lensless imaging in an array of scientific fields, ranging from X ray science to astronomy. Existing techniques for solving the phase problem rely on algorithms that are iterative and -- consequently -- slow, which greatly hampers their use in synchrotron and XFEL environments. Deep learning based approaches demonstrate impressive speedups at the expense of imaging quality and an onerous need for large amounts of labeled training data, but recent progress has largely solved these two weaknesses through \emph{unsupervised} deep learning (DL) methods that incorporate diffraction physics within the model (physics-informed neural networks: PINNs). In this work we introduce a new reconstruction approach using a representative CDI technique, ptychography. We extend the PINN concept by combining the diffraction forward map with a second physics-based constraint based on measurement overlaps. Our resulting approach, PtychoPINN, retains the intrinsic speed of DL-based reconstruction (1000-fold that of iterative solvers) while greatly improving upon the accuracy, resolution, and generalizability of prior state-of-the-art DL-based ptychographic reconstruction, with 5- to 10-fold improvements in spatial resolution.}
+
 %  for bandwidth-limited real-space objects that are close-ish to bandwidth-limited
 
 % conclusion: mention the aleatoric uncertainty there, no need to have in the abstract
@@ -131,42 +133,25 @@
 
 \maketitle
 
-\section{Introduction }\label{sec1}
 %\cite{epie}
 
-%% outline version of the introduction:
-%\begin{itemize}
-%\item Phase retrieval is an important problem in varied instances of CDI, such as in nanoscale imaging (Bragg coherent diffractive imaging reconstruction (BCDI), ptychography (electron and X-ray)), optical super-resolution, and astronomical wavefront sensing. \cite{dean2006phase, heintzmann2021answers, miao2015beyond} Such lensless imaging techniques give unique capability because they remove the limitations of optics, thereby allowing diffraction-limited imaging in a wider variety of settings. 
-%\item In all such configurations, the measured quantity -- number of photons on a detector pixel -- depends on the amplitude alone of the diffracted wave. To construct real space images, the lost phase information must be recovered by solving the inverse problem of \emph{phase retrieval}, which is typically done using iterative methods. \cite{epie} The computational cost of these algorithms precludes CDI in high-throughput or \emph{in situ} settings. As a secondary issue, such methods often suffer from sensitivity to noise and convergence problems.  \emph{(cites)}
-%\item There is a considerable literature on applications of DL to inverse problems, and within that community there has been good success in using neural networks (NNs) to solve the CDI phase problem much more rapidly than is possible with conventional iterative methods. \emph{(cites)} Early efforts used supervised neural networks to extract several-orders of magnitude speedups, with two considerable caveats: degradation in reconstruction quality (\emph{examples, cites}) and a requirement for large amounts of high-quality labeled training data. 
-%\item More recently, work such as Ratner et al.\cite{ratner2021recovering} (on XFEL diagnostics) and Yao et al. \cite{yao2022autophasenn} (on BCDI) introduced the strategy of incorporating the diffraction forward map into deep learning models to remove the need for labels.  Such models are quite attractive because they combine unsupervised training with reconstruction quality comparable to (or approaching) that of supervised methods. 
-%\item Notably -- and despite the initial success of these models -- applications of PINNs to CDI have not explored physical priors other than the diffraction forward map and sampling requirements of the DFT, nor have they handled any stochasticity of the physics. It is plausible \emph{a priori} that additional constraints and principled probabilistic treatments would accrue improvements to both accuracy and generalization. \emph{explain why (or save that for the discussion section). essentially, this just extends the idea that putting in the forward map improves generalization by teaching the model diffraction physics.}
-%%Specifically, in the case of ptychography, no one has considered PINN-style overlap constraints.
-%\item In this work, we further develop the PINN computational approach to CDI for the specific problem of ptychographic reconstruction. We combine three elements: (1) unsupervised training using the diffraction forward map; (2) additional physics-based constraints informed by the ptychography setup; and (3) explicitly probabilistic treatment of photon counting (Poisson) statistics. We find that this particular mix of model features combines the advantages of a (vanilla) PINN approach, namely speed and unsupervised training, with significantly better reconstruction accuracy than other DL approaches (whether supervised or unsupervised / PINN-based). 
-%%\item Finally, note the relevance of stochasticity to model robustness and the need for probabilistic formulations to model these aspects of the physics. Prior NN-based modeling efforts have not considered this, as far as we know. 
-%\end{itemize}
-
-%% text version of the introduction, v1
-%Phase retrieval is a fundamental problem in many instances of coherent diffraction imaging (CDI), including nanoscale imaging (Bragg coherent diffractive imaging reconstruction (BCDI), electron and X-ray ptychography), optical super-resolution, and astronomical wavefront sensing. These lensless imaging techniques offer a unique capability by removing the limitations of optics, thereby enabling diffraction-limited imaging in a wider variety of settings. In all such configurations, the measured quantity, i.e., the number of photons on a detector pixel, depends solely on the amplitude of the diffracted wave. To construct real space images, the lost phase information must be recovered by solving the inverse problem of phase retrieval, which is typically done using iterative methods. However, the computational cost of these algorithms limits CDI in high-throughput or in situ settings. Additionally, such methods often suffer from sensitivity to noise and convergence problems.
-%
-%There is a considerable literature on applications of deep learning (DL) to inverse problems, and within that community, there has been good success in using neural networks (NNs) to solve the CDI phase problem much more rapidly than is possible with conventional iterative methods. Early efforts used supervised neural networks to extract several orders of magnitude speedups, but with two considerable caveats: degradation in reconstruction quality and a requirement for large amounts of high-quality labeled training data.
-%
-%More recently, work such as Ratner et al. (on XFEL diagnostics) and Yao et al. (on BCDI) introduced the strategy of incorporating the diffraction forward map into deep learning models to remove the need for labels. Such models are quite attractive because they combine unsupervised training with reconstruction quality comparable to (or approaching) that of supervised methods.
-%
-%However, despite the initial success of these models, applications of Physics-Informed Neural Networks (PINNs) to CDI have not explored physical priors other than the diffraction forward map and sampling requirements of the discrete Fourier transform (DFT), nor have they handled any stochasticity of the physics. It is plausible a priori that additional constraints and principled probabilistic treatments would accrue improvements to both accuracy and generalization.
-%
-%In this work, we further develop the PINN computational approach to CDI for the specific problem of ptychographic reconstruction. We combine three elements: (1) unsupervised training using the diffraction forward map, (2) additional physics-based constraints informed by the ptychography setup, and (3) an explicitly probabilistic treatment of photon counting (Poisson) statistics. We find that this particular mix of model features combines the advantages of a vanilla PINN approach, namely speed and unsupervised training, with significantly better reconstruction accuracy than other DL approaches, whether supervised or unsupervised/PINN-based.
-
-
-
 % text version of the introduction, v2
-Phase retrieval is a critical problem in several instances of coherent diffractive imaging (CDI), including nanoscale imaging such as Bragg coherent diffractive imaging reconstruction (BCDI) and ptychography (electron and X-ray), optical super-resolution, and astronomical wavefront sensing. These lensless imaging techniques provide a unique capability by eliminating the limitations of optics and allowing diffraction-limited imaging in a wider range of settings \cite{dean2006phase, heintzmann2021answers, miao2015beyond}. However, in all such configurations, the measured quantity - the number of photons on a detector pixel - depends on the amplitude alone of the diffracted wave. To construct real space images, the lost phase information must be recovered by solving the inverse problem of phase retrieval, typically done using iterative methods \cite{epie}. Unfortunately, the computational cost of these algorithms precludes CDI in high-throughput or in situ settings, and such methods often suffer from sensitivity to noise and convergence problems.
+\section{Introduction }\label{sec1}
+Phase retrieval is a crucial problem in various instances of coherent diffractive imaging (CDI), including nanoscale imaging techniques such as Bragg coherent diffractive imaging reconstruction (BCDI) and ptychography (electron and X-ray), optical super-resolution, and astronomical wavefront sensing. These lensless imaging methods offer unique capabilities by eliminating the limitations of optics, enabling diffraction-limited imaging across a broader range of settings \cite{dean2006phase, heintzmann2021answers, miao2015beyond}. However, in all such configurations, the measured quantity - the number of photons on a detector pixel - depends solely on the amplitude of the diffracted wave. To construct real-space images, the lost phase information must be recovered by solving the inverse problem of phase retrieval, typically done using iterative methods \cite{epie}. Unfortunately, the computational cost of these algorithms hinders CDI in high-throughput or in situ settings, and such methods often suffer from noise sensitivity and convergence issues.
 
-There is a considerable literature on applications of deep learning (DL) to inverse problems, and within that community, there has been significant success in using neural networks (NNs) to solve the CDI phase problem much more rapidly than is possible with conventional iterative methods \cite{ratner2021recovering,yao2022autophasenn}. Early efforts used supervised neural networks to extract several-orders of magnitude speedups, with two considerable caveats: degradation in reconstruction quality and a requirement for large amounts of high-quality labeled training data. More recently, strategies such as incorporating the diffraction forward map into deep learning models have been introduced to remove the need for labels. These models are quite attractive because they combine unsupervised training with reconstruction quality comparable to (or approaching) that of supervised methods.
+A considerable body of literature focuses on applying deep learning (DL) to inverse problems, with significant success in employing neural networks (NNs) to solve the CDI phase problem much more rapidly than conventional iterative methods \cite{ratner2021recovering,yao2022autophasenn}. Early efforts utilized supervised neural networks to achieve several-orders of magnitude speed improvements, accompanied by two major drawbacks: degradation in reconstruction quality and the need for large volumes of high-quality labeled training data. More recently, strategies such as incorporating the diffraction forward map into deep learning models have been introduced to eliminate the requirement for labels. These models are particularly appealing because they combine unsupervised training with reconstruction quality comparable to (or approaching) that of supervised methods.
 
-However, despite the initial success of these models, applications of physics-informed neural networks (PINNs) to CDI have not explored physical priors or constraints other than the diffraction forward map and sampling requirements of the discrete Fourier transform (DFT), nor have they modeled any stochasticity of the relevant physics. \emph{flow} It is plausible that additional constraints and principled probabilistic treatments would improve both accuracy and generalization.
+Despite the initial success of these models, applications of physics-informed neural networks (PINNs) to CDI have not explored physical priors or constraints beyond the diffraction forward map and discrete Fourier transform (DFT) sampling requirements, nor have they modeled any stochasticity of the relevant physics. \emph{flow} It is conceivable that additional constraints and principled probabilistic treatments could enhance both accuracy and generalization.
 
-In this work, we further develop the PINN computational approach to CDI for the specific problem of ptychographic reconstruction. We combine three elements: unsupervised training using the diffraction forward map, additional physics-based constraints informed by the ptychography setup, and explicitly probabilistic treatment of photon counting (Poisson) statistics. We find that this particular mix of model features combines the advantages of a vanilla PINN approach, namely speed and unsupervised training, with significantly better reconstruction accuracy than other NN-based solvers, including physics-informed approaches.
+In this work, we further develop the PINN computational approach to CDI, specifically for ptychographic reconstruction. We integrate three elements: unsupervised training using the diffraction forward map, additional physics-based constraints informed by the ptychography setup, and an explicitly probabilistic treatment of photon counting (Poisson) statistics. We find that this unique combination of model features merges the advantages of a standard PINN approach, namely speed and unsupervised training, with significantly better reconstruction accuracy than other NN-based solvers, including physics-informed approaches.
+
+%Phase retrieval is a critical problem in several instances of coherent diffractive imaging (CDI), including nanoscale imaging such as Bragg coherent diffractive imaging reconstruction (BCDI) and ptychography (electron and X-ray), optical super-resolution, and astronomical wavefront sensing. These lensless imaging techniques provide a unique capability by eliminating the limitations of optics and allowing diffraction-limited imaging in a wider range of settings \cite{dean2006phase, heintzmann2021answers, miao2015beyond}. However, in all such configurations, the measured quantity - the number of photons on a detector pixel - depends on the amplitude alone of the diffracted wave. To construct real space images, the lost phase information must be recovered by solving the inverse problem of phase retrieval, typically done using iterative methods \cite{epie}. Unfortunately, the computational cost of these algorithms precludes CDI in high-throughput or in situ settings, and such methods often suffer from sensitivity to noise and convergence problems.
+%
+%There is a considerable literature on applications of deep learning (DL) to inverse problems, and within that community, there has been significant success in using neural networks (NNs) to solve the CDI phase problem much more rapidly than is possible with conventional iterative methods \cite{ratner2021recovering,yao2022autophasenn}. Early efforts used supervised neural networks to extract several-orders of magnitude speedups, with two considerable caveats: degradation in reconstruction quality and a requirement for large amounts of high-quality labeled training data. More recently, strategies such as incorporating the diffraction forward map into deep learning models have been introduced to remove the need for labels. These models are quite attractive because they combine unsupervised training with reconstruction quality comparable to (or approaching) that of supervised methods.
+%
+%However, despite the initial success of these models, applications of physics-informed neural networks (PINNs) to CDI have not explored physical priors or constraints other than the diffraction forward map and sampling requirements of the discrete Fourier transform (DFT), nor have they modeled any stochasticity of the relevant physics. \emph{flow} It is plausible that additional constraints and principled probabilistic treatments would improve both accuracy and generalization.
+%
+%In this work, we further develop the PINN computational approach to CDI for the specific problem of ptychographic reconstruction. We combine three elements: unsupervised training using the diffraction forward map, additional physics-based constraints informed by the ptychography setup, and explicitly probabilistic treatment of photon counting (Poisson) statistics. We find that this particular mix of model features combines the advantages of a vanilla PINN approach, namely speed and unsupervised training, with significantly better reconstruction accuracy than other NN-based solvers, including physics-informed approaches.
 
 %largely due to the mismatch between their deterministic assumptions and the intrinsic stochasticity of diffractive measurements.
 
@@ -179,7 +164,7 @@ In this work, we further develop the PINN computational approach to CDI for the 
 \section{Methods, Models \& Tests}
 \subsection{Approach}
 
-Physics-based CDI reconstruction methods are accurate because they invert the physically correct forward map of far field diffraction, making them capable of finding the optimal solution for any input, at least in principle. However, due to the difficult nonconvex optimization problem, these methods require computationally expensive iterative solution schemes. Additionally, iterative reconstruction is oblivious to regularities in the input data, so each new diffraction signal requires repeating redundant calculations from scratch. In contrast, NN-based reconstruction methods take a different approach: they don't impose any inductive biases or prior knowledge of the diffraction physics but instead rely on a large amount of training data to fit a flexible black box model from scratch. The lack of inductive biases and physical consistency-enforcing constraints in NN-based methods causes them to have poor accuracy and generalization with respect to the underlying physics, although they may capture particular data regularities well. Nonetheless, the single forward pass nature of NN-based methods makes them intrinsically rapid at inference time.
+Physics-based CDI reconstruction methods are accurate because they invert the physically correct forward map of far field diffraction, making them capable of finding the optimal solution for any input, at least in principle. However, due to the difficult nonconvex optimization problem, these methods require computationally expensive iterative solution schemes. Additionally, iterative reconstruction is oblivious to regularities in the input data, so each new diffraction signal requires redundant computation. In contrast, NN-based reconstruction methods take a different approach: they don't impose any inductive biases or prior knowledge of the diffraction physics but instead rely on a large amount of training data to fit a flexible black box model from scratch. The lack of inductive biases and physical consistency-enforcing constraints in NN-based methods causes them to have poor accuracy and generalization with respect to the underlying physics, although they may capture particular data regularities well. Nonetheless, the single forward pass nature of NN-based methods makes them intrinsically rapid at inference time.
 
 In this perspective, physics-informed neural networks (PINNs) attempt to unite the best of both worlds. By strongly constraining a NN's hypothesis space to exclude parameter combinations that generate unphysical solutions we can steer a model towards correct solutions while considerably reducing its need for training data. As a concrete starting point, defining the model's loss function over the forward-mapped (i.e. far field-diffracted) NN output -- instead of the immediate NN output -- forces the NN to learn diffraction physics rather than merely fit \emph{a priori} arbitrary input/output pairs. This is the foundation for prior PINN approaches for unsupervised CDI reconstruction (\emph{cites}).
 
@@ -199,7 +184,7 @@ To do so without a need for labeled training data we rely on an autoencoder form
 
 In prior PINN approaches to CDI reconstruction, $F$ is typically the forward map of far-field diffraction. Here, we instead start by subdividing $F$ into two distinct parts: a \emph{constraint} map $ F_c: Y \rightarrow Y$ and a diffraction map $ F_d: Y \rightarrow X$, such that $F(Y) = F_d(F_c(Y))$. The role of $F_c$ is to impose the real-space constraints necessary for exploiting overlapping diffraction measurements and making the inversion well posed. $F$ may depend on parameters $\theta$ such as the experimental geometry, so we relate it to a functional $\mathbf{F}$, such that $F = \mathbf{F}(\theta)$.
 
-In our concrete implementation the elements of a set of training samples $\{x_i\}$ have shape $64 \times 64 \times 4$, corresponding to four diffraction patterns measured at neighboring scan point coordinates. We denote a particular diffraction image with index $k$ $(k \in \mathcal{K} = \{0, 1, 2, 3\}$) as $x_i^k$. Each $x_i$ is paired with its matching 2D Euclidean probe beam coordinates, $r_i$ ($r_i \in \theta$). Correspondingly, the reconstruction $y_i = G(x_i)$ is a 3D tensor of shape $32 \times 32 \times 4$. (The factor-of-two difference in size between $x_i$ and $y_i$ reflects sampling requirements of the discrete Fourier transform (\emph{cites})). Finally, to distinguish between the two real-space representations we let $\bar{y}_i = F_c(y_i)$.
+In our concrete implementation the elements of a set of training samples $\{x_i\}$ have shape $64 \times 64 \times 4$, corresponding to four diffraction patterns measured at neighboring scan point coordinates. We denote a particular diffraction image with index $k$ $(k \in \mathcal{K} = \{0, 1, 2, 3\}$) as $x_i^k$. Each $x_i$ is paired with its matching 2D Euclidean probe beam coordinates, $r_i$ ($r_i \in \theta$). Correspondingly, the reconstruction $y_i = G(x_i)$ is a 3D tensor of shape $32 \times 32 \times 4$. (The factor-of-two difference in size between $x_i$ and $y_i$ reflects sampling requirements of the discrete Fourier transform (\emph{cites})). Finally, to distinguish between the two real-space representations we let $\bar{y}_i = F_c(y_i)$. We denote the amplitude and phase of $\bar{y}$ as $A$ and $\phi$, respectively, throughout this paper.
 
 The inverse map $G$ consists of an encoder-decoder architecture with a similar structure to PtychoNN and $F_d$ is mostly defined by diffraction physics. The element of most interest is $F_c$, which we detail below.
 
@@ -217,7 +202,7 @@ $$
 
 where $Pad2d$ denotes zero-padding a $32 \times 32$ tensor to $64 \times 64$ and $T(\delta r, y)$ is the translation of a 2D tensor $y$ by the vector $\delta r$. $\mu_i$ is the origin of a local coordinate system for the group of scan points and is normally set to their centroid position, for convenience. The denominator \emph{of equation xx} is a normalizing term, and $\bf{1}$ denotes a $32 \times 32$ tensor of all ones. 
 
-To convert the 2-dimensional $\hat{y}_i$ into an object that matches the (3D) shape of $\hat{x}_i$, we reverse the individual shifts in the summand of \emph{equation xx} and multiply each result by the probe function $P(r)$:
+To convert the 2-dimensional $\hat{y}_i$ into an object that matches the (3D) shape of the autoencoder output $\hat{x}_i$, we reverse the individual shifts in the summand of \emph{equation xx} and multiply each result by the probe function $P(r)$:
 
 $$
 \bar{y}_i^k = T(\mu_i - r_i^k, \hat{y}_i) P(r) \approx O(r) P(r - r_i^k),
@@ -225,34 +210,40 @@ $$
 
 where $O(r)$ is the ground-truth object. (The domain of the approximation is a $32 \times 32$ patch centered at $r_i^k$.)
 
-\emph{more explanations, especially about $\hat{y}$}
+The explanation given above, particularly about $\hat{y}$, provides the complete constraint map $\mathbf{F_c}(r_i)$. It is now safe to apply the far-field diffraction map to each channel of $\bar{Y}^k$.
 
-\emph{ref equations} gives us the complete constraint map $\mathbf{F_c}(r_i)$. %; we can now safely apply the far-field diffraction map to each channel of $\bar{Y}^k$.
-
-\emph{In summary...... mention forward map}
+In summary, our approach integrates the unsupervised training using the diffraction forward map and the additional physics-based constraints in real space. This approach leverages both the advantages of physics-based methods and the efficiency of neural networks, making it a powerful tool for CDI reconstruction.
 
 It is instructive to compare this realization of overlap constraints with that of iterative CDI reconstruction schemes, which implement the same concept in a different way. In methods such as ePIE, the optimization loop includes a so-called backpropagation step that uses the inverse-Fourier transform to convert residuals on the reciprocal space amplitude of each individual diffraction pattern into incremental updates of the estimate for $O(r)$. \cite{ePIE} Our approach applies the constraint directly in $Y$-space, thus avoiding the need for expensive back-and-forth transforms. 
 
 
 \subsubsection{Probabilistic output and loss function}
+%\subsubsection{Loss function}
+
+%The model loss is a simple MAE objective over reconstructed diffraction 
+%
+%$$
+%Loss(\hat{x}, x) = \sum_{i,j,k}\log f_{\text{Poiss}}(I_{ijk};\lambda_{ijk})
+%$$
+
 We choose the model output to be a collection of independent Poisson distributions parameterized by the forward-mapping of the final-layer output of the NN. This reproduces the correct photon-counting statistics of the diffraction measurement and allows us to calculate a likelihood, with respect to the Poisson parameters, for the distribution of per-pixel detected photon counts. The negative log over these Poisson likelihoods is \emph{a priori} a more principled loss function than the typical choice of mean absolute average (MAE) deviation between target and predicted pixel values.
 
 Explicitly, the loss function is
 
 $$
-Loss(I, \lambda) = \sum_{i,j,k}\log f_{\text{Poiss}}(I_{ijk};\lambda_{ijk})
+Loss(x, \lambda(\hat{x})) = \sum_{i,j,k}\log f_{\text{Poiss}}(x_{ijk}^2;\lambda_{ijk})
 $$
 
 
-where $I_{ijk}$ is the number of photons detected in a single pixel, $\lambda_{ijk}$ is the matching final-layer output of the CNN, $i$ and $j$ index the detector coordinates, and $k$ indexes separate images within a diffraction set. 
+where $\lambda_{ijk}(\hat{x}) = \hat{x}_{ijk}^2$, $x_{ijk}^2$ is the number of photons detected in a single pixel (its square root $x_{ijk}$ is the associated predicted amplitude), $\lambda_{ijk}$ is the matching final-layer output of the CNN, $i$ and $j$ index the detector coordinates, and $k$ indexes separate images within a diffraction set. 
 
 For the above probabilistic formulation of the data, model output, and loss function to be self-consistent it is necessary for the units of the diffraction pixel values to be (unscaled) photon counts. A typical diffraction intensity is $10^9$ photons per exposure whereas the magnitude of activations within the NN -- including, in particular, the reconstructed real-space amplitude -- should be of order unity. To invertibly scale the input (and output) we define a global normalization parameter that we initialize using a simple heuristic based on the mean photon count of images in the training dataset and unitarity property of the Fourier transform. (\emph{ref appendix or supplemental materials for formula}). This normalization parameter can optionally be either fixed or optimized during training. 
 
 
 \subsection{Data generation}
-To prepare the model's training and evaluation data we begin with a collection of complex-valued images. We consider three types of images: simulated compositions of randomly-oriented lines, (simulated) Gaussian random field samples, and experimentally-derived phase and amplitude from x-ray ptychographic measurements of an etched tungsten test sample, which we retrieved from a publicly available dataset. For each real-space object dataset we simulate a collection of diffraction patterns corresponding to a rectangular grid of scan points on the sample and a known (complex-valued) probe function. Given the real-space object $O(r)$ and far-field diffraction forward map $f(k) = F(O(r))$, the simulated diffraction pixel values are random samples from $P(s f(k))$, where $P$ is the Poisson distribution and $s$ is a dimensionless normalizing parameter that controls the average number of collected photons in the simulated diffraction. 
+To prepare the model's training and evaluation data we begin with a collection of complex-valued images. We consider three types of images: simulated compositions of randomly-oriented lines, (simulated) Gaussian random field samples, and experimentally-derived phase and amplitude from x-ray ptychographic measurements of an etched tungsten test sample, which we retrieved from a publicly available dataset. For each real-space object dataset we simulate a collection of diffraction patterns corresponding to a rectangular grid of scan points on the sample and a known (complex-valued) probe function. Given the real-space object $O(r)$ and far-field diffraction forward map $F_d$, the simulated diffraction pixel values are random samples from $f_{\text{Poiss}}(F_d(O(r))^2)$, where $f_{\text{Poiss}}$ is the Poisson distribution.
+% and $s$ is a dimensionless normalizing parameter that controls the average number of collected photons in the simulated diffraction. 
 
-We denote the real-space amplitude and phase as $A$ and $\phi$, respectively, throughout this paper. 
 
 %First, we follow the proven approach of using an autoencoder formalism to reduce the problem to unsupervised training. We adopt a 2D covolutional architecture with one encoder to transform diffraction images into compact embeddings and two decoders to map those embeddings into real-space maps of phase and amplitude. The final stage of the model transforms the phase and amplitude into reciprocal-space complex object using the forward map of far field diffraction. \emph{cite PtychoNN, AutophaseNN}
 %$F_d$ incorporates the far-field diffraction forward map and 
@@ -278,6 +269,9 @@ We denote the real-space amplitude and phase as $A$ and $\phi$, respectively, th
 % This removes the inversion degeneracy that plagues PtychoNN.
 % TODO amplitude map or complex object?
 
+\emph{The PtychoPINN model was implemented using the Keras library with the Tensorflow backend. The training dataset is a combination of simulated diffraction patterns and experimental diffraction patterns. As described in the data generation section, various parameters are set to create a diverse set of amplitude and phase states. The training dataset consists of 54,028 patterns, with 52,000 used for training and 2,028 reserved for testing. Data augmentation, such as rotation, is applied to the training dataset to further expand the number of training examples.}
+
+\emph{The entire training dataset is randomly split, with 80 percent used for training and the remaining 20 reserved for validation. During training, the Adaptive Moment Estimation (ADAM) optimizer is employed with an initial learning rate of 0.001 to update the model's weights and biases. The model's performance is evaluated using validation data at the end of each epoch. The ReduceLROnPlateau callback is used to reduce the learning rate by a factor of 2 when the validation loss has stopped improving. The network is trained in parallel on 8 NVIDIA A100 GPUs for 60 epochs, as specified by the nepochs argument. The training employs a mini-batch size of 16.}
 
 
 % TODO do we want full comparison of all the PINN variations here, or save that for the discussion section?
@@ -297,9 +291,9 @@ We explored the behavior of PtychoPINN by training and testing it on two additio
 %To check the persistence of these improvements independent of the specific object morphology, we trained and evaluated PtychoPINN for the two additional object types described in section \emph{ref Data preparation} in table \ref{tab1}. PtychoPINN yields factors of 3.5 and 3.8 improvement in amplitude and phase MAE, respectively, for the second simulated dataset (GRF images), but only a factor 1.3 improvement for the experimental dataset.  The variation in level of improvement between these three datasets suggests that the supervised-learning baseline succeeds at reconstructing objects without sharp features (e.g. the etched tungsted object) but struggles with high-spatial frequency information. Between the two simulated object types, the `lines'  dataset has sharper features and a corresponding larger improvement in reconstruction error. In the case of the experimental dataset we can see (Fig. \ref{fig:exp_comparison}) that there is limited room for improvement, as both PtychoPINN and PtychoNN produce adequate reconstructions.
 
 \subsubsection{Ablation study}
-To better understand the specific aspects of PtychoPINN that contribute to its improved performance, we conducted an ablation study evaluating the impact of unsupervised/PINN-based training, real-space constraints, and the choice of loss function (diffraction MAE vs. Poisson NLL). The comparison of reconstruction mean absolute errors (MAEs) in Table \ref{tab1} suggests that the combination of overlap constraints and PINN structure is the most significant factor in improving performance. It is worth noting that neither the PINN architecture nor the overlap constraints yield a substantial improvement in reconstruction accuracy when used separately. Moreover, we observed a small but consistent improvement in performance when using the Poisson NLL objective.
+%To better understand the specific aspects of PtychoPINN that contribute to its improved performance, we conducted an ablation study evaluating the impact of unsupervised/PINN-based training, real-space constraints, and the choice of loss function (diffraction MAE vs. Poisson NLL). The comparison of reconstruction mean absolute errors (MAEs) in Table \ref{tab1} suggests that the combination of overlap constraints and PINN structure is the most significant factor in improving performance. It is worth noting that neither the PINN architecture nor the overlap constraints yield a substantial improvement in reconstruction accuracy when used separately. Moreover, we observed a small but consistent improvement in performance when using the Poisson NLL objective.
 
-%To provide a more detailed attribution of the source of PtychoPINN's improvements with respect to different model aspects, we conducted an ablation study. We evaluated the impact of unsupervised/PINN-based training, the addition of real-space constraints, and the choice of loss function (diffraction MAE vs. Poisson NLL). The comparison of reconstruction MAEs summarized in Table \ref{tab1} reveals that the combination of overlap constraints and PINN structure is the most significant contribution to the model's performance.  Notably, the PINN architecture and overlap constraints do not produce a large improvement in reconstruction accuracy when one is present without the other. (The NLL objective yields a small but consistent additional improvement.)
+To better understand the specific aspects of PtychoPINN that contribute to its improved performance, we conducted an ablation study evaluating the impact of unsupervised/PINN-based training and real-space constraints. The comparison of reconstruction accuracy (MAE), resolution (Fourier ring correlation, FRC), and peak signal-to-noise ratio (PSNR) in Table \ref{tab1} suggests that the combination of overlap constraints and PINN structure is the most significant factor in improving performance. It is worth noting that neither the PINN architecture nor the overlap constraints yield a substantial improvement in reconstruction accuracy when used separately.
 
 \subsubsection{Generalization analysis}
 In addition to these standard accuracy and resolution metrics we qualitatively examined PtychoPINN's generalization. In Figure XX of our supplemental materials, we compare the reconstruction of a composition of lines by PtychoNN, a basic PINN, and PtychoPINN, with all three models trained on the same GRF dataset. While the basic PINN and PtychoPINN both recover recognizable line features, PtychoNN produces objects that are quasi-reproductions of the GRF samples, with no recovery of line details smaller than the probe diameter. 
@@ -537,61 +531,9 @@ The PINN structure thus brings about a substantial improvement in resolution, bu
 
 
 
-% \begin{table}[h]
-% \begin{center}
-% %\begin{minipage}{174pt}
-% \caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab1}%
-% \begin{tabular}{@{}llll@{}}
-% \toprule
-% Model features & lines & GRF  & experimental \\
-% \midrule
-% $\{\}$ \footnotemark[1]    & 0.041   & 0.015 & 0.028\\
-% $\{\mathrm{PINN}  \}$  & 0.042   & 0.044 & 0.039 \\
-% $\{\mathrm{overlaps}  \}$  & 0.018   & 0.011 & 0.027 \\
-% $\{\mathrm{PINN}, \mathrm{overlaps}  \}$  & 0.0084  & 0.0029 & 0.025\\
-% $\{\mathrm{PINN}, \mathrm{Poisson~NLL} \}$  & 0.040   & 0.024 & 0.038\\
-% $\{\mathrm{PINN}, \mathrm{overlaps}, \mathrm{Poisson~NLL}  \}$  & \bf{0.0045}   & \bf{0.0016} & \bf{0.022} \\
-% \botrule
-% \end{tabular}
-% \end{center}
-% \footnotetext[1]{PtychoNN baseline}
-% %\footnotetext[2]{Simulated `lines' dataset}
-% %\end{minipage}
-% \end{table}
-
-%% TODO Old version of the table, need to update values
-%\begin{table}[h]
-%\begin{center}
-%%\begin{minipage}{174pt}
-%\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab1}%
-%\begin{tabular}{@{}llll@{}}
-%\toprule
-%Model features & lines & GRF  & experimental \\
-%\midrule
-%$\{\}$ \footnotemark[1]    & -   & 0.015 & 0.028\\
-%$\{\mathrm{PINN}  \}$  & -   & 0.044 & 0.039 \\
-%$\{\mathrm{overlaps}  \}$  & -   & 0.011 & 0.027 \\
-%$\{\mathrm{PINN}, \mathrm{overlaps}  \}$  & -  & 0.0029 & 0.025\\
-%$\{\mathrm{PINN}, \mathrm{Poisson~NLL} \}$  & -   & 0.024 & 0.038\\
-%$\{\mathrm{PINN}, \mathrm{overlaps}, \mathrm{Poisson~NLL}  \}$  & -   & \bf{0.0016} & \bf{0.022} \\
-%\botrule
-%\end{tabular}
-%\end{center}
-%\footnotetext[1]{PtychoNN baseline}
-%%\footnotetext[2]{Simulated `lines' dataset}
-%%\end{minipage}
-%\end{table}
-
-%$\{\}$ \footnotemark[1]    & -   & 0.015 & 
-%$\{\mathrm{PINN}  \}$  & -   & 0.044 & 0.039 \\
-%$\{\mathrm{overlaps}  \}$  & -   & 0.011 & 0.027 \\
-%$\{\mathrm{PINN}, \mathrm{overlaps}  \}$  & -  & 0.0029 & 0.025\\
-%$\{\mathrm{PINN}, \mathrm{Poisson~NLL} \}$  & -   & 0.024 & 0.038\\
-%$\{\mathrm{PINN}, \mathrm{overlaps}, \mathrm{Poisson~NLL}  \}$  & -   & \bf{0.0016} & \bf{0.022} \\
-
 \begin{table}[h]
 \begin{center}
-\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab1}%
+\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
 \begin{tabular}{p{2cm}llllll}
 \toprule 
     Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
@@ -613,65 +555,11 @@ $\{$PINN,~overlaps$\}$   & 0.0077 & 0.019 & 0.0077 & \bf{0.011} & 0.025 \\
 \end{table}
 
 
-%\begin{table}[h]
-%\begin{center}
-%\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
-%\begin{tabular}{p{2cm}llllll}
-%\toprule 
-%    Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
-%    & MAE($A$) & MAE($\phi$)
-%    & MAE($A$) & MAE($\phi$)
-%    & MAE($A$) \\%& MAE($\phi$) \\
-%    \midrule
-%& $\{\}$ \footnotemark[1]    & MAE & 0.00394 &  0.542 &   0.0181 &  0.0458 &  0.0245 &   0.13 \\
-%&         PSNR  &  92.5 &   50.6 &     80.9 &    71.9 &    40.4 &   62.8 \\
-%&         FRC50 &  34 &      5 &       56 &      53 &      51 &      3 \\
-%$\{$overlaps$\}$& MAE &     0.00343 &  0.549 &   0.0166 &  0.0364 &  0.0269 &  0.187 \\
-%&         PSNR  &  93.9 &   50.4 &     81.5 &    74.6 &      41 &   60.3 \\
-%&         FRC50 &  39 &      1 &       62 &       6 &    49.5 &      2 \\
-%$\{\mathrm{PINN}  \}$& MAE &     0.00598 &  0.495 &   0.0371 &    0.11 &  0.0386 &  0.164 \\
-%&         PSNR  &  53.8 &     52 &       67 &    65.3 &      65 &   63.2 \\
-%&         FRC50 &   8 &      8 &       26 &       6 &      25 &   11.5 \\
-%$\{$PINN,~overlaps$\}$ & MAE &     0.00287 &  0.147 &  0.00543 &   0.012 &  0.0146 &  0.109 \\
-%&         PSNR  &  54.8 &   60.8 &     80.5 &    84.5 &    59.1 &      7 \\
-%&         FRC50 &  39 &     51 &       94 &      94 &     136 &     88 \\
-%    \bottomrule
-%\end{tabular}
-%\end{center}
-%\footnotetext[1]{PtychoNN baseline}
-%\end{table}
 
-%\begin{table}[h]
-%\begin{center}
-%\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
-%\begin{tabular}{p{2cm}llllll}
-%\toprule 
-%    Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
-%    & MAE($A$) & MAE($\phi$)
-%    & MAE($A$) & MAE($\phi$)
-%    & MAE($A$) \\%& MAE($\phi$) \\
-%    \midrule
-%$\{\}$ \footnotemark[1]    &  MAE & 0.00394 &  0.542 &   0.0181 &  0.0458 &  0.0245 &   0.13 \\
-%&         PSNR  &  92.5 &   50.6 &     80.9 &    71.9 &    40.4 &   62.8 \\
-%&         FRC50 &  34 &      5 &       56 &      53 &      51 &      3 \\
-%$\{$overlaps$\}$& MAE &     0.00343 &  0.549 &   0.0166 &  0.0364 &  0.0269 &  0.187 \\
-%&         PSNR  &  93.9 &   50.4 &     81.5 &    74.6 &      41 &   60.3 \\
-%&         FRC50 &  39 &      1 &       62 &       6 &    49.5 &      2 \\
-%$\{\mathrm{PINN}  \}$& MAE &     0.00598 &  0.495 &   0.0371 &    0.11 &  0.0386 &  0.164 \\
-%&         PSNR  &  53.8 &     52 &       67 &    65.3 &      65 &   63.2 \\
-%&         FRC50 &   8 &      8 &       26 &       6 &      25 &   11.5 \\
-%$\{$PINN,~overlaps$\}$ & MAE &     0.00287 &  0.147 &  0.00543 &   0.012 &  0.0146 &  0.109 \\
-%&         PSNR  &  54.8 &   60.8 &     80.5 &    84.5 &    59.1 &      7 \\
-%&         FRC50 &  39 &     51 &       94 &      94 &     136 &     88 \\
-%    \bottomrule
-%\end{tabular}
-%\end{center}
-%\footnotetext[1]{PtychoNN baseline}
-%\end{table}
 
 \begin{table}[h]
 \begin{center}
-\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier ring correlation (FRC50) }\label{tab2}%
+\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier ring correlation (FRC50) }\label{tab1}%
 \begin{tabular}{p{2cm}l|ll|ll|ll}
 \toprule 
     %Model features & \multicolumn{1}{c}{} & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
@@ -783,6 +671,19 @@ PINN,overlaps\footnotemark[2]
 \end{figure}
 
 %\begin{figure}[h]%
+%\end{figure}
+
+%\begin{figure}%
+%    \centering
+%    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi_experimental.png} }}%
+%    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi_experimental.png} }}%
+%    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi_experimental.png} }}%
+%\vfill
+%    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth_experimental.png} }}%
+%    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN_experimental.png} }}%
+%    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
+%    \caption{Reconstruction comparison, simulated data}%
+%    \label{fig:exp_comparison_detailed}%
 %\end{figure}
 
 \begin{figure}%
