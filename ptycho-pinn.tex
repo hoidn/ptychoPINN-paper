@@ -309,15 +309,33 @@ In addition to these standard accuracy and resolution metrics we qualitatively e
 %We also assessed the generalization ability of PtychoPINN through a qualitative analysis. As shown in Figure XX of our supplementary materials, we compared the reconstruction of one type of object -- compositions of overlapping lines -- using PtychoNN, a basic PINN, and PtychoPINN, all trained on a different object type (the GRF dataset). The results indicate that while both basic PINN and PtychoPINN can reconstruct recognizable line features, PtychoNN's output is limited to quasi-reproductions of the GRF samples, lacking the resolution of features smaller than the probe diameter.
 
 
+%\subsection{Discussion}
+%In this work, we introduce PtychoPINN, an unsupervised learning approach for scanning coherent diffraction imaging (CDI) that combines real-space constraints with a physics-informed neural network (PINN) architecture. The resulting framework offers near-order of magnitude improvements in reconstruction accuracy and resolution while maintaining the intrinsic speed of NN-based reconstruction.
+%% TODO transition
+%
+%\subsubsection{Unlabeled training}
+%The unsupervised training of PINN-based approaches provides several advantages over supervised learning methods, including ease of obtaining training data, reduced dependence on out-of-sample generalization, and on-the-fly model updates. These advantages are crucial for real-time scientific applications.
+%
+%\subsubsection{Generalization}
+%Furthermore, we find that PINN architectures have a second intrinsic strength: superior generalization. Even a rudimentary PINN without overlap constraints yields better out-of-sample generalization compared to the baseline supervised learning approach (Figure XX, supplemental materials). We explain this by noting the PINN structure requires the inverse map $G(X)$ to learn diffraction physics through its coupling to the far field diffraction map $F_d$ and diffraction-space loss function $L$. This linkage imposes approximate physical consistency between the real-space reconstruction and the measured diffraction.  Supervised training, in contrast, in practice leads to violations of even coarse-grained requirements such as that of the FT's unitarity (i.e. $\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and $\bar{y} \equiv F_c(G(x))$).
+%
+%Furthermore, because $\hat{x} = F_d(\bar{y})$ is not a bijection and the loss function does not directly depend on $\bar{y}$, PINN training automatically ignores differences in real-space structure that are not detectable in the diffraction -- supervised training, on the other hand, is prone to wasting model capacity by `memorizing' the training labels. In brief, supervised learning approaches suffer in generalization because they must reconstruct a mapping $x \rightarrow \hat{y}$  without the guidance of any helpful inductive biases.
+%
+%%, its intermediation reduces the PINN's opportunity to waste model capacity on memorizing particular training sample geometries. In contrast, a supervised learning approach that reconstructs real-space images $\hat{y}$ from diffraction images $x$ fits a mapping $x \rightarrow \hat{y}$  without the guidance of any inductive biases, which leads to egregious deviation from the consistency condition $F_d(\bar{y}) = x$ that the forward map encapsulates. 
+%
+%%In contrast, in the case of supervised This linkage approximately enforces the FT's unitarity ($\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and the definition $\bar{y} \equiv F_c(G(x))$), along with all other symmetries of $F_d$. Notably, because $F_d$ is not a bijection, its intermediation reduces the PINN's opportunity to waste model capacity on memorizing particular training sample geometries. In contrast, a supervised learning approach that reconstructs real-space images $\hat{y}$ from diffraction images $x$ fits a mapping $x \rightarrow \hat{y}$  without the guidance of any inductive biases, which leads to egregious deviation from the consistency condition $F_d(\bar{y}) = x$ that the forward map encapsulates. 
+
 \subsection{Discussion}
-In this work, we introduce PtychoPINN, an unsupervised learning approach for scanning coherent diffraction imaging (CDI) that combines real-space constraints with a physics-informed neural network (PINN) architecture. The resulting framework offers near-order of magnitude improvements in reconstruction accuracy and resolution while maintaining the intrinsic speed of NN-based reconstruction.
+In this work, we present PtychoPINN, an unsupervised learning approach for scanning coherent diffraction imaging (CDI) that integrates real-space constraints with a physics-informed neural network (PINN) architecture. This framework yields substantial improvements in reconstruction accuracy and resolution, nearly an order of magnitude, while preserving the inherent speed of NN-based reconstruction.
 % TODO transition
 
-\subsubsection{Unlabeled training}
-The unsupervised training of PINN-based approaches provides several advantages over supervised learning methods, including ease of obtaining training data, reduced dependence on out-of-sample generalization, and on-the-fly model updates. These advantages are crucial for real-time scientific applications.
+\subsubsection{Unsupervised training}
+Unsupervised training of PINN-based approaches offers several benefits over supervised learning methods. These include the ease of acquiring training data, reduced reliance on out-of-sample generalization, and the ability to perform on-the-fly model updates. These advantages are essential for real-time scientific applications.
 
 \subsubsection{Generalization}
-Furthermore, we find that PINN architectures have a second intrinsic strength: superior generalization. Even a rudimentary PINN without overlap constraints yields better out-of-sample generalization compared to the baseline supervised learning approach (Figure XX, supplemental materials). We explain this by noting the PINN structure requires the inverse map $G(X)$ to learn diffraction physics through its coupling to the far field diffraction map $F_d$ and diffraction-space loss function $L$. This linkage approximately enforces the FT's unitarity ($\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and the definition $\bar{y} \equiv F_c(G(x))$), along with all other symmetries of $F_d$. Notably, because $F_d$ is not a bijection, its intermediation reduces the PINN's opportunity to waste model capacity on memorizing particular training sample geometries. In contrast, a supervised learning approach that reconstructs real-space images $\hat{y}$ from diffraction images $x$ fits a mapping $x \rightarrow \hat{y}$  without the guidance of any inductive biases, which leads to egregious deviation from the consistency condition $F_d(\bar{y}) = x$ that the forward map encapsulates. 
+Additionally, we find that PINN architectures possess another inherent strength: superior generalization. Even a basic PINN without overlap constraints demonstrates better out-of-sample generalization compared to the baseline supervised learning approach (Figure XX, supplemental materials). We attribute this to the PINN structure, which necessitates the inverse map $G(X)$ to learn diffraction physics through its connection to the far-field diffraction map $F_d$ and diffraction-space loss function $L$. This association enforces approximate physical consistency between the real-space reconstruction and the measured diffraction. In contrast, supervised training often leads to violations of even coarse-grained requirements, such as the FT's unitarity (i.e., $\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and $\bar{y} \equiv F_c(G(x))$).
+
+Moreover, since $\hat{x} = F_d(\bar{y})$ is not a bijection and the loss function does not directly depend on $\bar{y}$, PINN training inherently disregards differences in real-space structure that are undetectable in the diffraction. Conversely, supervised training is susceptible to wasting model capacity by 'memorizing' the training labels. In summary, supervised learning approaches face challenges in generalization due to the task of reconstructing an \emph{a priori} arbitrary map $x \rightarrow \hat{y}$ without the guidance of useful inductive biases.
 
 \subsubsection{Resolution and Accuracy}
 PtychoPINN's progress in reconstruction quality is interesting from two points of view: its practical importance to scientific uses and its potential for interpreting the behavior of the model itself. To better understand the model, it is helpful to distinguish between \emph{resolution} and \emph{accuracy}.
@@ -577,7 +595,6 @@ The PINN structure thus brings about a substantial improvement in resolution, bu
 \begin{tabular}{p{2cm}llllll}
 \toprule 
     Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
-
     & MAE($A$) & MAE($\phi$)
     & MAE($A$) & MAE($\phi$)
     & MAE($A$) \\%& MAE($\phi$) \\
@@ -594,6 +611,137 @@ $\{$PINN,~overlaps$\}$   & 0.0077 & 0.019 & 0.0077 & \bf{0.011} & 0.025 \\
 \end{center}
 \footnotetext[1]{PtychoNN baseline}
 \end{table}
+
+
+%\begin{table}[h]
+%\begin{center}
+%\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
+%\begin{tabular}{p{2cm}llllll}
+%\toprule 
+%    Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
+%    & MAE($A$) & MAE($\phi$)
+%    & MAE($A$) & MAE($\phi$)
+%    & MAE($A$) \\%& MAE($\phi$) \\
+%    \midrule
+%& $\{\}$ \footnotemark[1]    & MAE & 0.00394 &  0.542 &   0.0181 &  0.0458 &  0.0245 &   0.13 \\
+%&         PSNR  &  92.5 &   50.6 &     80.9 &    71.9 &    40.4 &   62.8 \\
+%&         FRC50 &  34 &      5 &       56 &      53 &      51 &      3 \\
+%$\{$overlaps$\}$& MAE &     0.00343 &  0.549 &   0.0166 &  0.0364 &  0.0269 &  0.187 \\
+%&         PSNR  &  93.9 &   50.4 &     81.5 &    74.6 &      41 &   60.3 \\
+%&         FRC50 &  39 &      1 &       62 &       6 &    49.5 &      2 \\
+%$\{\mathrm{PINN}  \}$& MAE &     0.00598 &  0.495 &   0.0371 &    0.11 &  0.0386 &  0.164 \\
+%&         PSNR  &  53.8 &     52 &       67 &    65.3 &      65 &   63.2 \\
+%&         FRC50 &   8 &      8 &       26 &       6 &      25 &   11.5 \\
+%$\{$PINN,~overlaps$\}$ & MAE &     0.00287 &  0.147 &  0.00543 &   0.012 &  0.0146 &  0.109 \\
+%&         PSNR  &  54.8 &   60.8 &     80.5 &    84.5 &    59.1 &      7 \\
+%&         FRC50 &  39 &     51 &       94 &      94 &     136 &     88 \\
+%    \bottomrule
+%\end{tabular}
+%\end{center}
+%\footnotetext[1]{PtychoNN baseline}
+%\end{table}
+
+%\begin{table}[h]
+%\begin{center}
+%\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
+%\begin{tabular}{p{2cm}llllll}
+%\toprule 
+%    Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
+%    & MAE($A$) & MAE($\phi$)
+%    & MAE($A$) & MAE($\phi$)
+%    & MAE($A$) \\%& MAE($\phi$) \\
+%    \midrule
+%$\{\}$ \footnotemark[1]    &  MAE & 0.00394 &  0.542 &   0.0181 &  0.0458 &  0.0245 &   0.13 \\
+%&         PSNR  &  92.5 &   50.6 &     80.9 &    71.9 &    40.4 &   62.8 \\
+%&         FRC50 &  34 &      5 &       56 &      53 &      51 &      3 \\
+%$\{$overlaps$\}$& MAE &     0.00343 &  0.549 &   0.0166 &  0.0364 &  0.0269 &  0.187 \\
+%&         PSNR  &  93.9 &   50.4 &     81.5 &    74.6 &      41 &   60.3 \\
+%&         FRC50 &  39 &      1 &       62 &       6 &    49.5 &      2 \\
+%$\{\mathrm{PINN}  \}$& MAE &     0.00598 &  0.495 &   0.0371 &    0.11 &  0.0386 &  0.164 \\
+%&         PSNR  &  53.8 &     52 &       67 &    65.3 &      65 &   63.2 \\
+%&         FRC50 &   8 &      8 &       26 &       6 &      25 &   11.5 \\
+%$\{$PINN,~overlaps$\}$ & MAE &     0.00287 &  0.147 &  0.00543 &   0.012 &  0.0146 &  0.109 \\
+%&         PSNR  &  54.8 &   60.8 &     80.5 &    84.5 &    59.1 &      7 \\
+%&         FRC50 &  39 &     51 &       94 &      94 &     136 &     88 \\
+%    \bottomrule
+%\end{tabular}
+%\end{center}
+%\footnotetext[1]{PtychoNN baseline}
+%\end{table}
+
+\begin{table}[h]
+\begin{center}
+\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier ring correlation (FRC50) }\label{tab2}%
+\begin{tabular}{p{2cm}l|ll|ll|ll}
+\toprule 
+    %Model features & \multicolumn{1}{c}{} & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
+    & \multicolumn{1}{c}{} & \multicolumn{2}{c}{experimental} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{lines}\\
+    \midrule
+    &
+    & $A$ & $\phi$
+    & $A$ & $\phi$
+    & $A$ & $\phi$ \\
+    \midrule
+$\{\}$\footnotemark[1]    
+& MAE & 0.00394 & 0.542 & 0.0181 & 0.0458 & 0.0245 & 0.13 \\
+& PSNR & -  & 50.6 & 80.9 & 71.9 & 40.4 & 62.8 \\
+& FRC50 & 34 & 5 & 56 & 53 & 51 & 3 \\
+    \midrule
+$\mathrm{PINN} $
+& MAE & 0.00598 & 0.495 & 0.0371 & 0.11 & 0.0386 & 0.164 \\
+& PSNR & -  & 52 & 67 & 65.3 & 65 & 63.2 \\
+& FRC50 & 8 & 8 & 26 & 6 & 25 & 11.5 \\
+    \midrule
+overlaps
+& MAE & 0.00343 & 0.549 & 0.0166 & 0.0364 & 0.0269 & 0.187 \\
+& PSNR & -  & 50.4 & \textbf{81.5} & 74.6 & 41 & 60.3 \\
+& FRC50 & 39 & 1 & 62 & 6 & 49.5 & 2 \\
+    \midrule
+PINN,overlaps\footnotemark[2]    
+& MAE & \textbf{0.00287} & \textbf{0.147} & \textbf{0.00543} & \textbf{0.012} & \textbf{0.00757} & \textbf{0.0208} \\
+& PSNR & -  & \textbf{60.8} & 80.5 & \textbf{84.5} & \textbf{60.9} & \textbf{79.7} \\
+& FRC50 & 39 & \textbf{51} & \textbf{94} & \textbf{94} & \textbf{170} & \textbf{173} \\
+\end{tabular}
+\end{center}
+\footnotetext[1]{supervised baseline}
+\footnotetext[2]{full PtychoPINN}
+\end{table}
+
+%\begin{table}[h]
+%\begin{center}
+%\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier ring correlation (FRC50) }\label{tab3}%
+%\begin{tabular}{p{2cm}l|ll|ll|ll}
+%\toprule 
+%    & \multicolumn{1}{c}{} & \multicolumn{2}{c}{experimental} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{lines}\\
+%    \midrule
+%    &
+%    & $A$ & $\phi$
+%    & $A$ & $\phi$
+%    & $A$ & $\phi$ \\
+%    \midrule
+%$\{\}$ \footnotemark[1]    
+%& MAE & 0.00394 & 0.542 & 0.0181 & 0.0458 & 0.0245 & 0.13 \\
+%& PSNR & \textbf{92.5} & 50.6 & 80.9 & 71.9 & 40.4 & 62.8 \\
+%& FRC50 & 34 & 5 & 56 & 53 & 51 & 3 \\
+%    \midrule
+%$\{$overlaps$\}$
+%& MAE & \textbf{0.00343} & \textbf{0.549} & \textbf{0.0166} & \textbf{0.0364} & 0.0269 & 0.187 \\
+%& PSNR & 93.9 & 50.4 & \textbf{81.5} & \textbf{74.6} & 41 & 60.3 \\
+%& FRC50 & 39 & 1 & 62 & 6 & 49.5 & 2 \\
+%    \midrule
+%$\{\mathrm{PINN}  \}$
+%& MAE & 0.00598 & 0.495 & 0.0371 & 0.11 & 0.0386 & 0.164 \\
+%& PSNR & 53.8 & 52 & 67 & 65.3 & 65 & 63.2 \\
+%& FRC50 & 8 & 8 & 26 & 6 & 25 & 11.5 \\
+%    \midrule
+%$\{$PINN,~overlaps$\}$
+%& MAE & \textbf{0.00287} & 0.147 & 0.00543 & 0.012 & \textbf{0.00757} & \textbf{0.0208} \\
+%& PSNR & 54.8 & \textbf{60.8} & 80.5 & \textbf{84.5} & \textbf{60.9} & \textbf{79.7} \\
+%& FRC50 & 39 & \textbf{51} & \textbf{94} & \textbf{94} & \textbf{170} & \textbf{173} \\
+%    \bottomrule
+%\end{tabular}
+%\end{center
+
 
 %In this table, we need 
 %a) Additional datasets to test on (can be just one more, but needs to be different). To report the robustness of results.
