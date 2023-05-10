@@ -166,16 +166,11 @@ In this work, we further develop the PINN computational approach to CDI, specifi
 
 Physics-based CDI reconstruction methods are accurate because they invert the physically correct forward map of far field diffraction, making them capable of finding the optimal solution for any input, at least in principle. However, due to the difficult nonconvex optimization problem, these methods require computationally expensive iterative solution schemes. Additionally, iterative reconstruction is oblivious to regularities in the input data, so each new diffraction signal requires redundant computation. In contrast, NN-based reconstruction methods take a different approach: they don't impose any inductive biases or prior knowledge of the diffraction physics but instead rely on a large amount of training data to fit a flexible black box model from scratch. The lack of inductive biases and physical consistency-enforcing constraints in NN-based methods causes them to have poor accuracy and generalization with respect to the underlying physics, although they may capture particular data regularities well. Nonetheless, the single forward pass nature of NN-based methods makes them intrinsically rapid at inference time.
 
-In this perspective, physics-informed neural networks (PINNs) attempt to unite the best of both worlds. By strongly constraining a NN's hypothesis space to exclude parameter combinations that generate unphysical solutions we can steer a model towards correct solutions while considerably reducing its need for training data. As a concrete starting point, defining the model's loss function over the forward-mapped (i.e. far field-diffracted) NN output -- instead of the immediate NN output -- forces the NN to learn diffraction physics rather than merely fit \emph{a priori} arbitrary input/output pairs. This is the foundation for prior PINN approaches for unsupervised CDI reconstruction (\emph{cites}).
+In this perspective, physics-informed neural networks (PINNs) attempt to unite the best of both worlds. By strongly constraining a NN's hypothesis space to exclude parameter combinations that generate unphysical solutions we can steer a model towards correct solutions while considerably reducing its need for training data. As a concrete starting point, defining the model's loss function over the forward-mapped (i.e. far field-diffracted) NN output -- instead of the immediate NN output -- forces the NN to learn diffraction physics rather than merely fit \emph{a priori} arbitrary input/output pairs. This is the foundation for prior PINN approaches for unsupervised CDI reconstruction \cite{yao2022autophasenn, ratner2021recovering}.
 
-\subsection{Model architecture}
+\subsection{PtychoPINN architecture}
 Given the above motivation we develop a new framework for ptychographic reconstruction, PtychoPINN. The architecture is illustrated by Fig. \ref{diagram}.
 
-\begin{figure}[h]%
-\centering
-\includegraphics[width=0.9\textwidth]{figures/lett.png}
-\caption{Neural network architecture and training configuration of the PtychoPINN model.}\label{diagram}
-\end{figure}
 
 
 \subsubsection{Formulation}
@@ -184,7 +179,7 @@ To do so without a need for labeled training data we rely on an autoencoder form
 
 In prior PINN approaches to CDI reconstruction, $F$ is typically the forward map of far-field diffraction. Here, we instead start by subdividing $F$ into two distinct parts: a \emph{constraint} map $ F_c: Y \rightarrow Y$ and a diffraction map $ F_d: Y \rightarrow X$, such that $F(Y) = F_d(F_c(Y))$. The role of $F_c$ is to impose the real-space constraints necessary for exploiting overlapping diffraction measurements and making the inversion well posed. $F$ may depend on parameters $\theta$ such as the experimental geometry, so we relate it to a functional $\mathbf{F}$, such that $F = \mathbf{F}(\theta)$.
 
-In our concrete implementation the elements of a set of training samples $\{x_i\}$ have shape $64 \times 64 \times 4$, corresponding to four diffraction patterns measured at neighboring scan point coordinates. We denote a particular diffraction image with index $k$ $(k \in \mathcal{K} = \{0, 1, 2, 3\}$) as $x_i^k$. Each $x_i$ is paired with its matching 2D Euclidean probe beam coordinates, $r_i$ ($r_i \in \theta$). Correspondingly, the reconstruction $y_i = G(x_i)$ is a 3D tensor of shape $32 \times 32 \times 4$. (The factor-of-two difference in size between $x_i$ and $y_i$ reflects sampling requirements of the discrete Fourier transform (\emph{cites})). Finally, to distinguish between the two real-space representations we let $\bar{y}_i = F_c(y_i)$. We denote the amplitude and phase of $\bar{y}$ as $A$ and $\phi$, respectively, throughout this paper.
+In our concrete implementation the elements of a set of training samples $\{x_i\}$ have shape $64 \times 64 \times 4$, corresponding to four diffraction patterns measured at neighboring scan point coordinates. We denote a particular diffraction image with index $k$ $(k \in \mathcal{K} = \{0, 1, 2, 3\}$) as $x_i^k$. Each $x_i$ is paired with its matching 2D Euclidean probe beam coordinates, $r_i$ ($r_i \in \theta$). Correspondingly, the reconstruction $y_i = G(x_i)$ is a 3D tensor of shape $32 \times 32 \times 4$. (The factor-of-two difference in size between $x_i$ and $y_i$ reflects sampling requirements of the discrete Fourier transform \cite{miao2000oversampling}). Finally, to distinguish between the two real-space representations we let $\bar{y}_i = F_c(y_i)$. We denote the amplitude and phase of $\bar{y}$ as $A$ and $\phi$, respectively, throughout this paper.
 
 The inverse map $G$ consists of an encoder-decoder architecture with a similar structure to PtychoNN and $F_d$ is mostly defined by diffraction physics. The element of most interest is $F_c$, which we detail below.
 
@@ -196,25 +191,24 @@ In CDI reconstruction the phase problem manifests as invariances of the diffract
 We describe the application of the real-space constraint map $\mathbf{F_c}(r_i)$ to $y_i$ in two steps. First, we sum the individual $y_i^k$ into a unified reconstruction $\hat{y}_i$ of shape $64 \times 64$:
 
 
-$$
-\hat{y}_i = \frac{\Sigma_{k \in \mathcal{K}} T(r_i^k - \mu_i, Pad2d(y_i^k))} {\Sigma_{k \in \mathcal{K}} T(r_i^k - \mu_i, Pad2d(\bf{1}))},
-$$
+\begin{equation} 
+\hat{y}_i = \frac{\Sigma_{k \in \mathcal{K}} T(r_i^k - \mu_i, Pad2d(y_i^k))} {\Sigma_{k \in \mathcal{K}} T(r_i^k - \mu_i, Pad2d(\bf{1}))},\label{eq:1}
+\end{equation}
 
-where $Pad2d$ denotes zero-padding a $32 \times 32$ tensor to $64 \times 64$ and $T(\delta r, y)$ is the translation of a 2D tensor $y$ by the vector $\delta r$. $\mu_i$ is the origin of a local coordinate system for the group of scan points and is normally set to their centroid position, for convenience. The denominator \emph{of equation xx} is a normalizing term, and $\bf{1}$ denotes a $32 \times 32$ tensor of all ones. 
+where $Pad2d$ denotes zero-padding a $32 \times 32$ tensor to $64 \times 64$ and $T(\delta r, y)$ is the translation of a 2D tensor $y$ by the vector $\delta r$. $\mu_i$ is the origin of a local coordinate system for the group of scan points and is normally set to their centroid position, for convenience. The denominator of equation (\ref{eq:1}) is a normalizing term, and $\bf{1}$ denotes a $32 \times 32$ tensor of all ones. 
 
-To convert the 2-dimensional $\hat{y}_i$ into an object that matches the (3D) shape of the autoencoder output $\hat{x}_i$, we reverse the individual shifts in the summand of \emph{equation xx} and multiply each result by the probe function $P(r)$:
+To convert the 2-dimensional $\hat{y}_i$ into an object that matches the (3D) shape of the autoencoder output $\hat{x}_i$, we reverse the individual shifts in the summand of (\ref{eq:1}) and multiply each result by the probe function $P(r)$:
 
 $$
 \bar{y}_i^k = T(\mu_i - r_i^k, \hat{y}_i) P(r) \approx O(r) P(r - r_i^k),
 $$
 
-where $O(r)$ is the ground-truth object. (The domain of the approximation is a $32 \times 32$ patch centered at $r_i^k$.)
+where $O(r)$ is the ground-truth object. (The domain of the approximation is a $32 \times 32$ patch centered at $r_i^k$.) The procedure above provides the complete constraint map $\mathbf{F_c}(r_i)$; it is now safe to apply the far-field diffraction map to each channel of $\bar{y}^k$.
 
-The explanation given above, particularly about $\hat{y}$, provides the complete constraint map $\mathbf{F_c}(r_i)$. It is now safe to apply the far-field diffraction map to each channel of $\bar{Y}^k$.
+In summary, this formulation integrates the unsupervised training using the diffraction forward map and the additional physics-based constraints in real space. It is instructive to compare this realization of overlap constraints with that of iterative CDI reconstruction schemes, which implement the same concept in a different way. In methods such as ePIE, the optimization loop includes a so-called backpropagation step that uses the inverse-Fourier transform to convert residuals on the reciprocal space amplitude of each individual diffraction pattern into incremental updates of the estimate for $O(r)$. \cite{epie} Our approach applies the constraint directly in $Y$-space, thus avoiding the need for expensive back-and-forth transforms. 
 
-In summary, our approach integrates the unsupervised training using the diffraction forward map and the additional physics-based constraints in real space. This approach leverages both the advantages of physics-based methods and the efficiency of neural networks, making it a powerful tool for CDI reconstruction.
+%This approach leverages both the advantages of physics-based methods and the efficiency of neural networks, making it a powerful tool for CDI reconstruction.
 
-It is instructive to compare this realization of overlap constraints with that of iterative CDI reconstruction schemes, which implement the same concept in a different way. In methods such as ePIE, the optimization loop includes a so-called backpropagation step that uses the inverse-Fourier transform to convert residuals on the reciprocal space amplitude of each individual diffraction pattern into incremental updates of the estimate for $O(r)$. \cite{ePIE} Our approach applies the constraint directly in $Y$-space, thus avoiding the need for expensive back-and-forth transforms. 
 
 
 \subsubsection{Probabilistic output and loss function}
@@ -269,9 +263,13 @@ To prepare the model's training and evaluation data we begin with a collection o
 % This removes the inversion degeneracy that plagues PtychoNN.
 % TODO amplitude map or complex object?
 
-\emph{The PtychoPINN model was implemented using the Keras library with the Tensorflow backend. The training dataset is a combination of simulated diffraction patterns and experimental diffraction patterns. As described in the data generation section, various parameters are set to create a diverse set of amplitude and phase states. The training dataset consists of 54,028 patterns, with 52,000 used for training and 2,028 reserved for testing. Data augmentation, such as rotation, is applied to the training dataset to further expand the number of training examples.}
 
-\emph{The entire training dataset is randomly split, with 80 percent used for training and the remaining 20 reserved for validation. During training, the Adaptive Moment Estimation (ADAM) optimizer is employed with an initial learning rate of 0.001 to update the model's weights and biases. The model's performance is evaluated using validation data at the end of each epoch. The ReduceLROnPlateau callback is used to reduce the learning rate by a factor of 2 when the validation loss has stopped improving. The network is trained in parallel on 8 NVIDIA A100 GPUs for 60 epochs, as specified by the nepochs argument. The training employs a mini-batch size of 16.}
+\subsection{Training}
+The PtychoPINN model was developed using the Keras library with Tensorflow 2 backend. The training dataset comprises a mix of simulated diffraction measurements derived from both randomly-generated objects and experimental data reconstructions using the ePIE algorithm \cite{cherukara2020ai}. Each training dataset contains 16,100 or 49,284 diffraction patterns for experimental and simulated objects, respectively, representing densely-sampled regions from one experimental or nine simulated objects.
+
+During the training process we use the Adaptive Moment Estimation (ADAM) optimizer with an initial learning rate of 0.001 to adjust the model's weights and biases. At the end of each epoch, the model's performance is assessed using validation data. The ReduceLROnPlateau callback is applied to decrease the learning rate by a factor of 2 when the NLL validation loss plateaus. The model is trained for 50 epochs, with a batch size of 16.
+
+%The PtychoPINN model was implemented using the Keras library with the Tensorflow backend. The training dataset is a collection of simulated diffraction measurements from a combination of randomly-generated objects and (ePIE) reconstructions of experimental data. \emph{cite PtychoNN} Each training dataset consists of $16,100$ or $49,284$ diffraction patterns for experimental and simulated objects, respectively, corresponding to densely-sampled regions from 1 (experimental) or 9 (simulated) objects. During training, the Adaptive Moment Estimation (ADAM) optimizer is used with an initial learning rate of 0.001 to update the model's weights and biases. The model's performance is evaluated using validation data at the end of each epoch. The ReduceLROnPlateau callback is used to reduce the learning rate by a factor of 2 when the NLL validation loss has stopped improving. The model is trained for 50 epochs with a batch size of 16. 
 
 
 % TODO do we want full comparison of all the PINN variations here, or save that for the discussion section?
@@ -327,13 +325,14 @@ In this work, we present PtychoPINN, an unsupervised learning approach for scann
 Unsupervised training of PINN-based approaches offers several benefits over supervised learning methods. These include the ease of acquiring training data, reduced reliance on out-of-sample generalization, and the ability to perform on-the-fly model updates. These advantages are essential for real-time scientific applications.
 
 \subsubsection{Generalization}
-Additionally, we find that PINN architectures possess another inherent strength: superior generalization. Even a basic PINN without overlap constraints demonstrates better out-of-sample generalization compared to the baseline supervised learning approach (Figure XX, supplemental materials). We attribute this to the PINN structure, which necessitates the inverse map $G(X)$ to learn diffraction physics through its connection to the far-field diffraction map $F_d$ and diffraction-space loss function $L$. This association enforces approximate physical consistency between the real-space reconstruction and the measured diffraction. In contrast, supervised training often leads to violations of even coarse-grained requirements, such as the FT's unitarity (i.e., $\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and $\bar{y} \equiv F_c(G(x))$).
+Additionally, we find that PINN architectures possess another inherent strength: superior generalization. Even a basic PINN without overlap constraints demonstrates better out-of-sample generalization compared to the baseline supervised learning approach (Figure XX, supplemental materials). We attribute this to the PINN structure, which necessitates the inverse map $G(X)$ to learn diffraction physics through its connection to the far-field diffraction map $F_d$ and diffraction-space loss function $L$. This association enforces approximate physical consistency between the real-space reconstruction and the measured diffraction. In contrast, supervised training in practice leads to violations of even high-level conservation rules, such as the FT's unitarity (i.e., $\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and $\bar{y} \equiv F_c(G(x))$).
 
-Moreover, since $\hat{x} = F_d(\bar{y})$ is not a bijection and the loss function does not directly depend on $\bar{y}$, PINN training inherently disregards differences in real-space structure that are undetectable in the diffraction. Conversely, supervised training is susceptible to wasting model capacity by 'memorizing' the training labels. In summary, supervised learning approaches face challenges in generalization due to the task of reconstructing an \emph{a priori} arbitrary map $x \rightarrow \hat{y}$ without the guidance of useful inductive biases.
+Moreover, since $\hat{x} = F_d(\bar{y})$ is not a bijection and the loss function does not directly depend on $\bar{y}$, PINN training inherently disregards differences in real-space structure that are undetectable in the diffraction measurement. Conversely, supervised training is susceptible to wasting model capacity by 'memorizing' the training data's real-space structure. All told, supervised learning approaches face challenges in generalization due to the task of reconstructing an \emph{a priori} arbitrary map $X \rightarrow \hat{Y}$ without the guidance of useful inductive biases.
 
 \subsubsection{Resolution and Accuracy}
 PtychoPINN's progress in reconstruction quality is interesting from two points of view: its practical importance to scientific uses and its potential for interpreting the behavior of the model itself. To better understand the model, it is helpful to distinguish between \emph{resolution} and \emph{accuracy}.
 
+% TODO
 Resolution is necessary for good reconstruction, but it is not sufficient on its own. Comparison of $32 \times 32$ reconstruction patches from PtychoPINN, PtychoNN, and a basic PINN (\emph{Fig. xx}, supplemental materials) reveals that the basic PINN's reconstruction of line features has comparable sharpness to PtychoPINN's, but unlike both PtychoNN and PtychoPINN, the basic PINN alters the placement of those features. This is because the far field diffraction forward map is invariant to coordinate inversion: i.e., real-space objects $O(r)$ and $O(-r)$ produce identical diffraction amplitudes. Therefore, the basic PINN is unable to distinguish between pairs of reconstructions that are chiral images of one another.
 
 The PINN structure thus brings about a substantial improvement in resolution, but it does not lead to a proportional increase in \emph{accuracy}. On the other hand, in PtychoPINN, the addition of real-space overlap constraints resolves the degeneracy that is associated with each pair of coordinate inversion-equivalent real-space candidates. Consequently, PtychoPINN shows a significant improvement in the accuracy of reconstruction. However, it is important to note that this improvement primarily arises from the correct placement of high-spatial frequency features, and not from an increase in the underlying information content of the real-space reconstruction.
@@ -494,11 +493,6 @@ The PINN structure thus brings about a substantial improvement in resolution, bu
 \end{itemize}
 
 
-\section{Misc. notes}
-\begin{itemize}
-
-\item The underlying manifold on which solutions live is smaller than the 64 x 64 output size ( oversampling requirement). Unsupervised models that are aware of this (e.g. AutophaseNN, PtychoPINN) thus have an output space of the correct (i.e. smaller) size. This may in part explain the PINN's better generalization / performance even in the absence of overlap information.
-\end{itemize}
 %Recent developments in machine learning can address  these problems in turn:
 %\begin{itemize}
 %    \item In contrast to physics-based reconstruction methods based on \emph{paramaterless} models, the machine learning approach ..... \emph{language}.... fits a powerful function approximator using a large amount of labeled samples from the inverse map. Inference is thus slow, but prediction is a simple, inexpensive forward pass through the model. Because the ML approach shifts the computational burden from prediction time to inference / training time, it ought to be dramatically faster in prediction. 
@@ -530,36 +524,31 @@ The PINN structure thus brings about a substantial improvement in resolution, bu
 %\includegraphics[width=0.9\textwidth]{figures/lett.png}
 
 
+\begin{figure}[h]%
+\centering
+\includegraphics[width=0.9\textwidth]{figures/lett.png}
+\caption{Neural network architecture and training configuration of the PtychoPINN model.}\label{diagram}
+\end{figure}
+
+\begin{figure}%
+    \centering
+%    \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/gt_phi.png} }}%
+%    \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/PtychoNN_phi.png} }}%
+%    \subfloat[\centering PtychoPINN]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi.png} }}%
+    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi.png} }}%
+    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi.png} }}%
+    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi.png} }}%
+\vfill
+    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth.png} }}%
+    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN.png} }}%
+    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN.png} }}%
+    \caption{Reconstruction comparison, simulated data}%
+    \label{fig:sim_comparison}%
+\end{figure}
 
 \begin{table}[h]
 \begin{center}
-\caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
-\begin{tabular}{p{2cm}llllll}
-\toprule 
-    Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
-    & MAE($A$) & MAE($\phi$)
-    & MAE($A$) & MAE($\phi$)
-    & MAE($A$) \\%& MAE($\phi$) \\
-    \midrule
-$\{\}$ \footnotemark[1]    & 0.036   & 0.12  & 0.027 & 0.045 & 0.028 \\
-$\{\mathrm{PINN}  \}$  & 0.036   & 0.077 & 0.049 & 0.088 & 0.039 \\
-$\{$overlaps$\}$  & 0.025 & 0.19 &  0.020 & 0.033 & 0.027 \\
-$\{$PINN,~overlaps$\}$   & 0.0077 & 0.019 & 0.0077 & \bf{0.011} & 0.025 \\
-  $\{$PINN,~NLL$\}$     & 0.043    &   0.18  & 0.049 & 0.12 &  0.038 \\
-  $\{$PINN,~NLL,\newline
- ~~overlaps$\}$     & \bf{0.0076}    &   \bf{0.014}  & \bf{0.0078} & .012 &  \bf{0.022}  \\
-    \bottomrule
-\end{tabular}
-\end{center}
-\footnotetext[1]{PtychoNN baseline}
-\end{table}
-
-
-
-
-\begin{table}[h]
-\begin{center}
-\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier ring correlation (FRC50) }\label{tab1}%
+\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier Ring Correlation (FRC50). }\label{tab1}%
 \begin{tabular}{p{2cm}l|ll|ll|ll}
 \toprule 
     %Model features & \multicolumn{1}{c}{} & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
@@ -572,28 +561,69 @@ $\{$PINN,~overlaps$\}$   & 0.0077 & 0.019 & 0.0077 & \bf{0.011} & 0.025 \\
     \midrule
 $\{\}$\footnotemark[1]    
 & MAE & 0.00394 & 0.542 & 0.0181 & 0.0458 & 0.0245 & 0.13 \\
-& PSNR & -  & 50.6 & 80.9 & 71.9 & 40.4 & 62.8 \\
+& PSNR (db) & 92.9  & 50.6 & 80.9 & 71.9 & 40.4 & 62.8 \\
 & FRC50 & 34 & 5 & 56 & 53 & 51 & 3 \\
     \midrule
 $\mathrm{PINN} $
 & MAE & 0.00598 & 0.495 & 0.0371 & 0.11 & 0.0386 & 0.164 \\
-& PSNR & -  & 52 & 67 & 65.3 & 65 & 63.2 \\
+& PSNR (db) & 88.8  & 52.4 & 67 & 65.3 & 65 & 63.2 \\
 & FRC50 & 8 & 8 & 26 & 6 & 25 & 11.5 \\
     \midrule
 overlaps
 & MAE & 0.00343 & 0.549 & 0.0166 & 0.0364 & 0.0269 & 0.187 \\
-& PSNR & -  & 50.4 & \textbf{81.5} & 74.6 & 41 & 60.3 \\
-& FRC50 & 39 & 1 & 62 & 6 & 49.5 & 2 \\
+& PSNR (db) & 93.2  & 50.7 & \textbf{81.5} & 74.6 & 41 & 60.3 \\
+& FRC50 & \textbf{39} & 1 & 62 & 6 & 49.5 & 2 \\
     \midrule
 PINN,overlaps\footnotemark[2]    
 & MAE & \textbf{0.00287} & \textbf{0.147} & \textbf{0.00543} & \textbf{0.012} & \textbf{0.00757} & \textbf{0.0208} \\
-& PSNR & -  & \textbf{60.8} & 80.5 & \textbf{84.5} & \textbf{60.9} & \textbf{79.7} \\
-& FRC50 & 39 & \textbf{51} & \textbf{94} & \textbf{94} & \textbf{170} & \textbf{173} \\
+& PSNR (db) & \textbf{95.8}  & \textbf{61.1} & 80.5 & \textbf{84.5} & \textbf{60.9} & \textbf{79.7} \\
+& FRC50 & \textbf{39} & \textbf{51} & \textbf{94} & \textbf{94} & \textbf{170} & \textbf{173} \\
 \end{tabular}
 \end{center}
 \footnotetext[1]{supervised baseline}
 \footnotetext[2]{full PtychoPINN}
 \end{table}
+
+\begin{figure}%
+    \centering
+    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi_experimental.png} }}%
+    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi_experimental.png} }}%
+    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi_experimental.png} }}%
+\vfill
+    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth_experimental.png} }}%
+    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN_experimental.png} }}%
+    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
+    \caption{Reconstruction comparison, experimental data}%
+    \label{fig:exp_comparison_detailed}%
+\end{figure}
+
+\begin{figure}%
+    \centering
+    \subfloat[\centering GRF dataset]{{\includegraphics[width=4cm]{figures/GRF.png} }}%
+    \caption{Gaussian random field dataset}%
+    \label{fig:sim_comparison}%
+\end{figure}
+
+\begin{figure}%
+    \centering
+    \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/generalizability_gt.png} }}%
+    \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/generalizability_PtychoNN.png} }}%
+    \subfloat[\centering PINN]{{\includegraphics[width=4cm]{figures/generalizability_PINN.png} }}%
+    \caption{Test of generalizability}%
+    \label{fig:sim_comparison}%
+\end{figure}
+
+
+% \begin{figure}%
+%     \centering
+%     \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/gt_experimental.png} }}%
+%     \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/PtychoNN_experimental.png} }}%
+%     \subfloat[\centering PtychoPINN]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
+%     \caption{Reconstruction comparison, experimental data. }%
+%     \label{fig:exp_comparison}%
+% \end{figure}
+
+
 
 %\begin{table}[h]
 %\begin{center}
@@ -638,63 +668,6 @@ PINN,overlaps\footnotemark[2]
 
 
 
-\begin{figure}%
-    \centering
-%    \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/gt_phi.png} }}%
-%    \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/PtychoNN_phi.png} }}%
-%    \subfloat[\centering PtychoPINN]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi.png} }}%
-    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi.png} }}%
-    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi.png} }}%
-    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi.png} }}%
-\vfill
-    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth.png} }}%
-    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN.png} }}%
-    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN.png} }}%
-    \caption{Reconstruction comparison, simulated data}%
-    \label{fig:sim_comparison}%
-\end{figure}
-
-\begin{figure}%
-    \centering
-    \subfloat[\centering GRF dataset]{{\includegraphics[width=4cm]{figures/GRF.png} }}%
-    \caption{Gaussian random field dataset}%
-    \label{fig:sim_comparison}%
-\end{figure}
-
-\begin{figure}%
-    \centering
-    \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/generalizability_gt.png} }}%
-    \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/generalizability_PtychoNN.png} }}%
-    \subfloat[\centering PINN]{{\includegraphics[width=4cm]{figures/generalizability_PINN.png} }}%
-    \caption{Test of generalizability}%
-    \label{fig:sim_comparison}%
-\end{figure}
-
-%\begin{figure}[h]%
-%\end{figure}
-
-%\begin{figure}%
-%    \centering
-%    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi_experimental.png} }}%
-%    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi_experimental.png} }}%
-%    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi_experimental.png} }}%
-%\vfill
-%    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth_experimental.png} }}%
-%    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN_experimental.png} }}%
-%    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
-%    \caption{Reconstruction comparison, simulated data}%
-%    \label{fig:exp_comparison_detailed}%
-%\end{figure}
-
-\begin{figure}%
-    \centering
-    \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/gt_experimental.png} }}%
-    \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/PtychoNN_experimental.png} }}%
-    \subfloat[\centering PtychoPINN]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
-    \caption{Reconstruction comparison, experimental data. }%
-    \label{fig:exp_comparison}%
-\end{figure}
-
 
 
 \backmatter
@@ -718,6 +691,35 @@ PINN,overlaps\footnotemark[2]
 
 \begin{appendices}
 
+\section*{Miscellaneous}
+\begin{itemize}
+
+\item The underlying manifold on which solutions live is smaller than the 64 x 64 output size ( oversampling requirement). Unsupervised models that are aware of this (e.g. AutophaseNN, PtychoPINN) thus have an output space of the correct (i.e. smaller) size. This may in part explain the PINN's better generalization / performance even in the absence of overlap information. We haven't mentioned this in the text, could go under Discussion / generalization.
+\item cite ansel adams print \cite{adams1944mount}
+\end{itemize}
+
+% \begin{table}[h]
+% \begin{center}
+% \caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
+% \begin{tabular}{p{2cm}llllll}
+% \toprule 
+%     Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
+%     & MAE($A$) & MAE($\phi$)
+%     & MAE($A$) & MAE($\phi$)
+%     & MAE($A$) \\%& MAE($\phi$) \\
+%     \midrule
+% $\{\}$ \footnotemark[1]    & 0.036   & 0.12  & 0.027 & 0.045 & 0.028 \\
+% $\{\mathrm{PINN}  \}$  & 0.036   & 0.077 & 0.049 & 0.088 & 0.039 \\
+% $\{$overlaps$\}$  & 0.025 & 0.19 &  0.020 & 0.033 & 0.027 \\
+% $\{$PINN,~overlaps$\}$   & 0.0077 & 0.019 & 0.0077 & \bf{0.011} & 0.025 \\
+%   $\{$PINN,~NLL$\}$     & 0.043    &   0.18  & 0.049 & 0.12 &  0.038 \\
+%   $\{$PINN,~NLL,\newline
+%  ~~overlaps$\}$     & \bf{0.0076}    &   \bf{0.014}  & \bf{0.0078} & .012 &  \bf{0.022}  \\
+%     \bottomrule
+% \end{tabular}
+% \end{center}
+% \footnotetext[1]{PtychoNN baseline}
+% \end{table}
 
 %%=============================================%%
 %% For submissions to Nature Portfolio Journals %%
