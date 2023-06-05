@@ -74,6 +74,7 @@
 \usepackage{amsmath}
 \usepackage{subfig}
 \usepackage{xcolor}
+\usepackage{rotating}
 
 \raggedbottom
 %%\unnumbered% uncomment this for unnumbered level heads
@@ -100,7 +101,7 @@
 
 \author[1,2]{\fnm{Third} \sur{Author}}\email{iiiauthor@gmail.com}
 
-\affil*[1]{\orgdiv{Department}, \orgname{SLAC National Accelerator Laboratory}, \orgaddress{\street{Street}, \city{City}, \postcode{100190}, \state{State}, \country{Country}}}
+\affil*[1]{SLAC National Accelerator Laboratory, Menlo Park, California, USA}
 
 % SLAC National Accelerator Laboratory\\
   % Menlo Park, CA-94025
@@ -116,9 +117,9 @@
 
 %\abstract{The phase problem of coherent diffractive imaging (CDI) is fundamental to lensless imaging in an array of scientific fields, ranging from X ray science to astronomy. Existing techniques for solving the phase problem rely on algorithms that are iterative and -- consequently -- slow, which greatly hampers their use in synchrotron and XFEL environments. Deep learning based approaches demonstrate impressive speedups at the expense of imaging quality and an onerous need for large amounts of labeled training data, which has recently led researchers in scientific learning to look at unsupervised methods that incorporate physics contraints to improve model performance. In this work we introduce a new reconstruction approach using a representative CDI technique, ptychography. We extend the concept of a physics-informed neural network (PINN) by combining the diffraction forward map with real-space constraints based on measurement overlaps. Our resulting approach, PtychoPINN, retains the intrinsic speed of DL-based reconstruction (1000-fold that of iterative solvers) while greatly improving upon the accuracy, resolution, and generalizability of prior state-of-the-art DL-based ptychographic reconstruction, with 3- to 4-fold improvement in linear resolution and an average PSNR increase of 10 dB.}
 
-\abstract{Lensless imaging methods like coherent diffractive imaging (CDI) and ptychography by bypassing the resolution limitation of optics are rapidly gaining applicability in an array of scientific fields, ranging from X-ray imaging to astronomy. The phase information lost in recording the diffraction patterns but needed for image reconstruction is currently recovered iteratively, which makes these methods inherently slow. Therefore the gain in image quality in CDI comes at a loss of real-time visualization. Deep learning-based strategies offer significant speed improvements but compromise on image quality.  Additionally, they require extensive labeled training data, which is a significant experimental burden.  These limitations prompted us to look at unsupervised methods. Here, we introduce a new unsupervised physics-informed neural network reconstruction approach   (PtychoPINN), that combines  the diffraction forward map with real-space constraints rooted in overlapping measurements to improve model performance. The proposed approach preserves the 1000 fold increase in the speed of the supervised deep-learning methods, while considerably enhancing generalizability, accuracy (average PSNR increase of 10 dB), and 3- to 4-fold enhancement in linear resolution. \textcolor{red} {What is the impact of this?  Something about allowing real-time control of operando measurements,  blah. blah}  }
+\abstract{Lensless imaging methods like coherent diffractive imaging (CDI) and ptychography by bypassing the resolution limitation of optics are rapidly gaining applicability in an array of scientific fields, ranging from X-ray imaging to astronomy. The phase information lost in recording the diffraction patterns but needed for image reconstruction is currently recovered iteratively, which makes these methods inherently slow. Therefore the gain in image quality in CDI comes at a loss of real-time visualization. Deep learning-based strategies offer significant speed improvements but compromise on image quality.  Additionally, they require extensive labeled training data, which is a significant experimental burden.  These limitations prompted us to look at unsupervised methods. Here, we introduce a new unsupervised physics-informed neural network reconstruction approach   (PtychoPINN), that combines  the diffraction forward map with real-space constraints rooted in overlapping measurements to improve model performance. The proposed approach preserves the 1000 fold increase in the speed of the supervised deep-learning methods, while considerably enhancing generalizability, accuracy (average PSNR increase of 10 dB), and 3- to 6-fold enhancement in linear resolution. This combination of performance and speed opens up possibilities for real-time, operando CDI in high-throughput environments such as X-ray free electron lasers (XFELs) and third-generation synchrotron light sources. }
+%\textcolor{red} {What is the impact of this?  Something about allowing real-time control of operando measurements,  blah. blah}
 
-%\textcolor{red}{Apurva's Abstract:hhh}
 
 %  for bandwidth-limited real-space objects that are close-ish to bandwidth-limited
 
@@ -151,11 +152,13 @@
 %4. Differentiate between PINNs in Section 2. (DONE)
 %5. add citations in the introductions (especially on claim of little prior research on physics-informed contraints)
 %6. intro has similar issue to the one we just fixed in the abstract, fix that 
+
+\textcolor{red}{Apurva's comments}
+\textcolor{blue}{Oliver's comments}
 \section{Introduction }\label{sec1}
-\textcolor{red}{Apurva's Comments Format}
 Coherent diffractive imaging (CDI) is a state-of-the-art imaging technique that uses diffraction from a coherent beam of light or electrons to reconstruct an image of a specimen without the need for optics. This microscopy technique is useful because it overcomes the lens aberrations of traditional lens-based imaging, thus allowing imaging at finer scales than previously possible. As a general approach CDI has found application in a broad range of settings, including nanoscale imaging through Bragg coherent diffractive imaging reconstruction (BCDI), X-ray ptychography, optical super-resolution, and astronomical wavefront sensing. \cite{dean2006phase, heintzmann2021answers, miao2015beyond}
 
-The main challenge of CDI, known as the phase retrieval problem, originates from the fact that detectors only record the intensity (i.e., squared amplitude) of the diffracted wave, not its phase. The phase carries essential information about the illuminated real-space object, and its loss stops the direct calculation of an image from the recorded diffraction. A breakthrough development over two decades ago outlined an iterative approach to solve the inverse problem of phase retrieval and made CDI image reconstruction possible \textcolor{red}{[ref: Miao, Sayers?]}. Unfortunately, these iterative algorithms are slow and typically computationally expensive \cite{epie}, which consequently precludes CDI in high-throughput or in situ settings, such as at x-ray free electron lasers (XFELs). In addition, such methods often suffer from noise sensitivity and limitations in robustness.
+The main challenge of CDI, known as the phase retrieval problem, originates from the fact that detectors only record the intensity (i.e., squared amplitude) of the diffracted wave, not its phase. The phase carries essential information about the illuminated real-space object, and its loss stops the direct calculation of an image from the recorded diffraction. A breakthrough development over two decades ago outlined an iterative approach to solve the inverse problem of phase retrieval and made CDI image reconstruction possible \cite{miao1999extending}. Unfortunately, these iterative algorithms are slow and typically computationally expensive \cite{epie}, which consequently precludes CDI in high-throughput or in situ settings, such as at x-ray free electron lasers (XFELs). In addition, such methods often suffer from noise sensitivity and limitations in robustness.
 
 A considerable body of literature focuses on applying deep learning (DL) to inverse problems, with significant success in employing neural networks (NNs) to solve the CDI phase problem much more rapidly than conventional iterative methods \cite{ratner2021recovering,yao2022autophasenn}. Early efforts utilized supervised learning to train these deep learning models and achieved several-orders of magnitude speed improvements, accompanied by two major drawbacks: degradation in reconstruction quality and the need for large volumes of high-quality labeled training data. More recently, strategies such as incorporating the diffraction forward map into deep learning models have been introduced to eliminate the requirement for labels. 
 %These models are particularly appealing because they combine unsupervised training with reconstruction quality comparable to (or approaching) that of supervised methods.
@@ -172,8 +175,7 @@ In this study, we integrate three novel elements for Machine Learning based appr
 
 Physics-based CDI reconstruction methods are accurate because they invert the physically correct forward map of far field diffraction, making them capable of finding the optimal solution, in principle, for any input. However, due to the difficult nonconvex optimization problem, these methods require computationally expensive iterative solution schemes. Additionally, iterative reconstruction is oblivious to regularities in the input data, so each new diffraction signal requires computation commencing from scratch. In contrast, NN-based reconstruction methods take a different approach: they may not incorporate domain knowledge of the diffraction physics but instead rely on a large amount of training data to fit a flexible black box model from scratch. The inductive biases introduced in the learning algorithm are chiefly from the choice of the model architecture. For instance, the use of convolutional and pooling layers renders the final model approximately translation invariant. The lack of domain knowledge-based inductive biases and physical consistency-enforcing constraints in conventional NN-based methods cause them to have reduced accuracy and generalization with respect to the underlying physics, although they may capture particular data regularities well. Additionally, conventional neural networks are trained via supervised learning approaches. Thus, they require large corpora of labeled data for training, and the limited diversity of the training data brings in bias. Nonetheless, the single forward pass nature of NN-based methods makes them intrinsically rapid at inference time.
 
-In this perspective \textcolor{red}{From this perspective?}, physics-informed neural networks (PINNs) attempt to unite the best of both worlds\footnote{Archetypal PINNs utilize a soft-constraint on the solution space by using the residual of the governing Partial Differential Equation as a regularization term. Our PINN model incorporates domain physics information in the architecture of the model.}. By strongly constraining a neural network model's hypothesis space to exclude parameter combinations that generate unphysical solutions, we can predispose a model towards physically correct solutions while also considerably reducing the need for training data. As a concrete starting point, defining the model's loss function over the forward-mapped (i.e., far field-diffracted) NN output -- instead of the immediate NN output -- forces the NN to learn diffraction physics rather than merely fit \emph{a priori} arbitrary input/output pairs. This is the foundation for prior PINN approaches for unsupervised CDI reconstruction \cite{yao2022autophasenn, ratner2021recovering}.
-
+From this perspective, physics-informed neural networks (PINNs) attempt to unite the best of both worlds\footnote{Archetypal PINNs utilize a soft-constraint on the solution space by using the residual of the governing Partial Differential Equation as a regularization term. Our PINN model incorporates domain physics information in the architecture of the model.}. By strongly constraining a neural network model's hypothesis space to exclude parameter combinations that generate unphysical solutions, we can predispose a model towards physically correct solutions while also considerably reducing the need for training data. As a concrete starting point, defining the model's loss function over the forward-mapped (i.e., far field-diffracted) NN output -- instead of the immediate NN output -- forces the NN to learn diffraction physics rather than merely fit \emph{a priori} arbitrary input/output pairs. This is the foundation for prior PINN approaches for unsupervised CDI reconstruction \cite{yao2022autophasenn, ratner2021recovering}.
 
 \subsubsection{Map formulation}
 % TODO language, repetitive
@@ -182,7 +184,7 @@ With this background in place, we develop a new approach for ptychographic recon
 To begin, the reconstruction problem requires approximating a mapping $G: X \rightarrow Y$ from the diffraction/reciprocal-space domain $X$ to the real-space domain $Y$. Because we wish to avoid supervised training, we rely on an autoencoder formalism that composes $G$ with a second mapping $F: Y \rightarrow X$. The output of the autoencoder is then $\hat{x} = F(G(x))$, where $x$ is the (complex) diffracted wave field. \footnote{The measured diffraction intensity is therefore $I \appropto x^2 $.}
 
 % TODO meeting - that rely wholly on a PINN loss
-In prior PINN approaches to CDI reconstruction, $F$ is typically the forward map of far-field diffraction. Here, we instead start by subdividing $F$ into two parts: a \emph{constraint} map $ F_c: Y \rightarrow Y$ and a diffraction map $ F_d: Y \rightarrow X$, such that $F(Y) = F_d(F_c(Y))$. Because diffraction patterns are centrosymmetric even for a non-centrosymmetric object  $F_c$ imposes the real-space constraints derived from overlapping diffraction measurements breaks the artificially imposed centrosymmetry and makes the inversion well-posed. $F$ may depend on parameters $\theta$ such as the experimental geometry, so we relate it to a functional $\mathbf{F}$, such that $F = \mathbf{F}(\theta)$.
+In prior PINN approaches to CDI reconstruction, $F$ is typically the forward map of far-field diffraction. Here, we instead start by subdividing $F$ into two parts: a \emph{constraint} map $ F_c: Y \rightarrow Y$ and a diffraction map $ F_d: Y \rightarrow X$, such that $F(Y) = F_d(F_c(Y))$. Because diffraction patterns are centrosymmetric even for a non-centrosymmetric object  $F_c$ imposes the real-space constraints derived from overlapping diffraction measurements to break the artificially imposed centrosymmetry and makes the inversion well-posed. $F$ may depend on parameters $\theta$ such as the experimental geometry, so we relate it to a functional $\mathbf{F}$, such that $F = \mathbf{F}(\theta)$.
 
 In our concrete implementation the elements of a set of training samples $\{x_i\}$ have shape $64 \times 64 \times 4$, corresponding to four diffraction patterns measured at neighboring scan point coordinates. We denote a particular diffraction image with index $k$ $(k \in \mathcal{K} = \{0, 1, 2, 3\}$) as $x_i^k$. Each $x_i$ is paired with its matching 2D Euclidean probe coordinates, $r_i$ ($r_i \in \theta$). Correspondingly, the reconstruction $y_i = G(x_i)$ is a 3D tensor of shape $32 \times 32 \times 4$. (The factor-of-two difference in size between $x_i$ and $y_i$ satifies the oversampling requirement for invertibility of the discrete Fourier transform \cite{miao2000oversampling}). Finally, to distinguish between the two real-space representations we let $\bar{y}_i = F_c(y_i)$. We denote the amplitude and phase of $\bar{y}$ as $A$ and $\phi$, respectively, throughout this paper.
 
@@ -195,7 +197,7 @@ The inverse map $G$ consists of an encoder-decoder architecture with a similar s
 %The phase problem in coherent diffractive imaging (CDI) reconstruction presents as invariant diffraction amplitudes due to real-space object inversion and translation. In the case of scanning CDI, it's necessary to solve this problem using real-space constraints that leverage overlapping measurements.
 In CDI reconstruction the phase problem manifests as invariances of the diffraction amplitude to coordinate inversion and translation of the real-space object. In the case of scanning CDI this must be solved using real-space constraints based on overlapping measurements.
 
-In order to detail how the real-space constraint map, $\mathbf{F_c}(r_i)$, is applied to $y_i$, we can break it down into two steps. Initially, we perform a summation of individual $y_i^k$ to create a unified reconstruction $\hat{y}_i$ with a shape of $64 \times 64$:
+In order to detail how the real-space constraint map, $\mathbf{F_c}(r_i)$, is applied to $y_i$, we can break it down into two steps. Initially, we sum the individual $y_i^k$ to create a unified reconstruction $\hat{y}_i$ with a shape of $64 \times 64$:
 %
 %We describe application of the real-space constraint map $\mathbf{F_c}(r_i)$ to $y_i$ in two steps. First, we sum the individual $y_i^k$ into a unified reconstruction $\hat{y}_i$ of shape $64 \times 64$:
 
@@ -262,55 +264,32 @@ With the approach now laid out, we introduce its implementation in the form of t
 
 \subsection{Data generation}\label{data}
 
+% TODO add phi images
+% TODO remove whitespace
 \begin{figure}
     \centering
     {{\includegraphics[width=12cm]{figures/datasets.png} }}%
-    \caption{Representative samples from the three dataset types used in this investigation.}%
+    \caption{Examples from three distinct dataset types used in this study. The `Lines' dataset and the Gaussian Random Field (GRF) dataset provide contrasting conditions of local symmetry. The GRF process produces characteristic speckle, while `Lines' consists of sharp, oriented edges. Contrary to both `Lines' and GRF dataset, the `Large Features' dataset lacks rapid variations in both its amplitude and phase images -- but its large-scale contrast is higher than that of `GRF'. }%
     \label{fig:datasets}%
 \end{figure}
+% sa contrast between conditions of low and high local symmetry, respectively. 
 
-To prepare the model's training and evaluation data we begin with a collection of complex-valued images. We consider three types of images: simulated compositions of randomly-oriented lines, (simulated) Gaussian random field samples, and experimentally-derived phase and amplitude from x-ray ptychographic measurements of an etched tungsten test sample, which we retrieved from a publicly available dataset\cite{cherukara2020ai}. Representative samples of each dataset type are shown in Figure \ref{fig:datasets}, labeled respectively as Lines for randomly-oriented lines, GRF for Gaussian Random Field and Experimental for the Experimental data of \cite{cherukara2020ai}. For each real-space object dataset we simulate a collection of diffraction patterns corresponding to a rectangular grid of scan points on the sample and a known (complex-valued) probe function. Given the real-space object $O(r)$ and far-field diffraction forward map $F_d$, the simulated diffraction pixel values are random samples from $f_{\text{Poiss}}(F_d(O(r))^2)$, where $f_{\text{Poiss}}$ is the Poisson distribution.
+To prepare the model's training and evaluation data we begin with a collection of complex-valued images. We consider three types of images: simulated compositions of randomly-oriented lines, (simulated) Gaussian random field samples, and experimentally-derived phase and amplitude from x-ray ptychographic measurements of an etched tungsten test sample, which we retrieved from a publicly available dataset\cite{cherukara2020ai}. Representative samples of each dataset type are shown in Figure \ref{fig:datasets}, labeled respectively as Lines for randomly-oriented lines, GRF for Gaussian Random Field and `Large features' for the experimentally-derived data of \cite{cherukara2020ai}. \textcolor{red}{Note that these three categories of images are qualitatively different.  The first image (lines) is composed of highly asymmetric overlapping; whereas, the other two are composed more equiaxed features, one has fine-scale features and the other larger coarser features.  (Is there a better way to describe these?}\textcolor{blue}{In the caption I went with `sharpness' and `local symmetry' as the two distinguishing properties, not sure if that makes sense though} For each real-space object dataset we simulate a collection of diffraction patterns corresponding to a rectangular grid of scan points on the sample and a known (complex-valued) probe function. Given the real-space object $O(r)$ and far-field diffraction forward map $F_d$, the simulated diffraction pixel values are random samples from $f_{\text{Poiss}}(F_d(O(r))^2)$, where $f_{\text{Poiss}}$ is the Poisson distribution.
 % (for the ptychographic dataset, an ePIE reconstruction is used as ground truth)
 % and $s$ is a dimensionless normalizing parameter that controls the average number of collected photons in the simulated diffraction. 
 
-
-%First, we follow the proven approach of using an autoencoder formalism to reduce the problem to unsupervised training. We adopt a 2D covolutional architecture with one encoder to transform diffraction images into compact embeddings and two decoders to map those embeddings into real-space maps of phase and amplitude. The final stage of the model transforms the phase and amplitude into reciprocal-space complex object using the forward map of far field diffraction. \emph{cite PtychoNN, AutophaseNN}
-%$F_d$ incorporates the far-field diffraction forward map and 
-%(This grouping of neighboring measurements in the channel dimension is a requirement of the constraint map, which we will explain shortly.)
-%; the purpose of $\mathbf{F_c}$ is to enforce those constraints. 
-
-%To describe $\mathbf{F_c}$ we begin with the probe function $P(r)$, real-space object $O(r)$, and scan point coordinate $r_i^k$, which together define a complex-valued object $O_i^k(r) \equiv O(r) P(r - r_i^k)$. 
 %
-%$O_i^k(r)$ is the ground truth of a real-space image corresponding to a single diffraction measurement and $y_i^k = G(x_i)^k$ is a model estimate of $O_i^k(r)$. Instead of directly passing $y_i$ to the diffraction map we first apply the real-space transformation $\mathbf{F_c}(r_i)$. (Note the separation of $\mathbf{F(\theta) = \mathbf{F_c(\theta)} \circ \mathbf{F_d(\theta)}}$). 
-%We separate $\mathbf{F_c}(r_i)$ into two steps. First, a summation of the individual $y_i^k$ into a unified reconstruction $\bar{y}_i$ of shape $64 \times 64$: 
-%(The complex tensor $\bar{y}_i^k$ approximates an illuminated patch of the object.)
 %TODO gradient spread between instances of the iteration loop
 
-%The joining of ptychograpic overlap constraints with NN-based reconstruction is our framework's main contribution. \emph{belongs in intro, discussion or conclusions, but should be emphasized}
-%, and numerical experiments can verify this expectation (\emph{ref Discussion section}).
-%$$f_{\text{Poiss}}(k;\lambda) = e^{-\lambda} \frac{\lambda^k}{k!}$$
-
-% Second, we make the ptychographic inversion well posed by imposing \emph{overlap} constraints in the reconstruction. In each forward pass the model processes a set of several diffraction patterns corresponding to overlapping illumination areas of the probe on the sample and maps that entire set of diffraction images into a single (average-reduced) complex-valued object. 
-
-% Second, to make the ptychographic inversion well-posed we impose overlap constraints in the reconstruction process. Specifically, in each forward pass, our model processes a set of diffraction patterns that correspond to overlapping illumination areas of the probe on the sample. We then map this entire set of diffraction images into a single, complex-valued object by averaging overlapping regions. It is important to note that reconstructing a real-space object from an individual diffraction pattern is not possible due to the invariance of the Fourier Transform amplitude to coordinate inversion. As a result, each diffraction amplitude image corresponds to at least two real-space reconstruction candidates. This property is intentionally incorporated into our approach to make the Fourier Transform inversion well-posed, as in iterative algorithms such as ePIE. In ePIE, the backpropagation step of the iteration loop uses inverse-Fourier transformation to convert residuals on the reciprocal space amplitude of each individual diffraction pattern into incremental updates of a globally-shared estimate of the real-space object.
-
-% In contrast to this overlap-merging setup, it is \emph{not} possible to reconstruct a real-space object from an individual diffraction pattern: the FT amplitude is invariant to coordinate inversion and therefore one diffraction amplitude image corresponds to at least two real-space reconstruction candidates (the inequality depends on whether additional degeneracies, such as translation invariance, are present). This is a deliberate adaptation of the property of iterative ptychographic reconstruction schemes that makes their FT inversion well-posed: in algorithms such as ePIE, one phase of the iteration loop -- the so-called backpropagation step -- uses inverse-Fourier transformation to convert residuals on the reciprocal space amplitude of each individual diffraction pattern into incremental updates of a globally-shared estimate of the real-space object. \emph{cite ePIE, etc.}
-% This removes the inversion degeneracy that plagues PtychoNN.
-% TODO amplitude map or complex object?
 
 
 \subsection{Training}
 %In each training instance, the dataset is a collection of simulated diffraction measurements derived from randomly-generated images, optical photographs, or experimental (x-ray ptychographic) images  \cite{cherukara2020ai}. 
 %For the generated or photographic images, each training dataset contains 49,284 diffraction patterns densely sampleed from 9 simulated objects. The experimental dataset is limited to a single object with 16,100 corresponding diffraction patterns. 
-For the non-experimental images, each training dataset contains 49,284 diffraction patterns densely sampled from 9 simulated objects. The experimental dataset is limited to a single object with 16,100 corresponding diffraction patterns. 
+For all object types except `Large features', each training dataset contains 49,284 diffraction patterns densely sampled from 9 simulated objects. (The `Large features' dataset is limited to a single object with 16,100 diffraction patterns, corresponding to its smaller underlying experimental dataset.)
 
 To train the model parameters we use the Adaptive Moment Estimation (ADAM) optimizer with an initial learning rate of 0.001.\cite{kingma2014adam} We train for 50 epochs and with a batch size of 16, which takes approximately 10 minutes on an Nvidia RTX 3090 GPU.
 
- % to adjust the model's parameters. At the end of each epoch, the model's performance is assessed using validation data. 
-%The ReduceLROnPlateau callback is applied to decrease the learning rate by a factor of 2 when the NLL validation loss plateaus.
-
-
-% TODO do we want full comparison of all the PINN variations here, or save that for the discussion section?
 
 \section{Results and Discussion}
 
@@ -326,23 +305,22 @@ To train the model parameters we use the Adaptive Moment Estimation (ADAM) optim
 %     \label{fig:sim_comparison}%
 % \end{figure}
 
-\begin{figure}%
+\begin{sidewaysfigure}%
     \centering
-    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/lines/ground_truth_lines_nophi2.png} }}%
+    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=6cm]{figures/lines/ground_truth_lines_nophi2.png} }}%
     \hspace*{0cm}
-    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/lines/ptychoNN_lines_nophi2.png} }}%
+    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=6cm]{figures/lines/ptychoNN_lines_nophi2.png} }}%
     \hspace*{0cm}
-    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/lines/PINN_lines_nophi2.png} }}%
+    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=6cm]{figures/lines/PINN_lines_nophi2.png} }}%
     \caption{Reconstruction comparison, simulated data}%
     \label{fig:sim_comparison}%
-\end{figure}
+\end{sidewaysfigure}
 
-
-%\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (Lines, GRF and Large features). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier Ring Correlation (FRC50). }\label{tab1}%
-
+%The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier Ring Correlation (FRC50).
 \begin{table}[h]
 \begin{center}
-\caption{caption }\label{tab1}%
+\caption{Three reconstruction metrics for the baseline supervised-learning model (PtychoNN) and several variations of the PINN architecture, repeated for datasets with contrasting asymmetry and feature sharpness: Lines, GRF and `Large features'. For each combination of dataset (top column header) and reconstruction metric, the best amplitude and phase reconstructions are bolded. Lines, with its sharp, asymmetric features, yields the largest improvements in reconstruction of the amplitude image by our approach (bottom left of table). The supervised-learning model recovers large amplitude features quite well (rightmost column), but PtychoPINN is consistently -- across all datasets -- more robust in its phase reconstruction.  
+}\label{tab1}
 \begin{tabular}{p{2cm}l|ll|ll|ll}
 \toprule
 & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{Large features}\\
@@ -381,6 +359,84 @@ PINN,overlaps\footnotemark[2]
 
 
 
+Figure \ref{fig:sim_comparison} presents a comparison of the reconstruction of artificially generated objects (from the `lines' data type of Fig. \ref{fig:datasets}) using PtychoPINN and the supervised learning baseline, PtychoNN. In these reconstructions, PtychoPINN demonstrates little noticeable degradation in the real-space amplitude and phase. In contrast, the supervised learning baseline shows substantial blurring. The 50 percent threshold of the amplitude Fourier ring correlation (FRC50), a useful measure of linear resolution, is $22.0~\mathrm{pixel}^{-1}$ for the baseline and a considerably improved $165.4~\mathrm{pixel}^{-1}$ for PtychoPINN. Furthermore, the peak signal-to-noise ratio (PSNR), a standard metric for reconstruction quality in the super-resolution literature, is 13 dB higher for PtychoPINN. 
+
+In order to explore the performance of the model across diverse data, we extended the evaluation to include two additional object types: those derived from Gaussian random field (GRF) generated objects and experimental measurements (Table \ref{tab1}).  For the current discussion please compare row-block 1 with 4. For each of the three image type, MAE metric for both phase and amplitude is significantly better for PtychoPINN with overlap than for baseline PtychoNN.  However, improvements in both PSNR and FRC50 were relatively modest for images with more equiaxed features compared to the improvements seen for the lines dataset. It should be noted, however, that the equiaxed image datasets have a smaller dynamic range and \textcolor{red}{more symmetric} features, which simplifies the reconstruction task.
+
+Fig. \ref{fig:exp_comparison_detailed}, we see that both PtychoPINN and PtychoNN yield good amplitude reconstructions of the experimental object. Yet, the baseline's satisfactory amplitude reconstruction stands in contrast to its more limited recovery of the phase image (FRC50 of $93.7~\mathrm{pixel}^{-1}$ and $23.4~\mathrm{pixel}^{-1}$, respectively for PtychoPINN and baseline \textcolor{red}{I don't see these values in Table 1.}\textcolor{blue}{I will update values in the text to match the latest version of table 1. The issue before was that different PtychoNN training runs can produce very different reconstruction qualities. A solid 20 percent of runs are outliers. For more robust results, I've now done 8 runs for each model, removed the first and fourth quartile results for each run / model combination, and averaged the rest)}). While both methods have some difficulty reconstructing the phase in areas of the object with low scattering amplitude, PtychoPINN proves more robust; the baseline model, on the other hand, has a propensity to incorrectly invert the phase in these low-amplitude regions (Fig. \ref{fig:exp_comparison_detailed}(b)). \textcolor{red}{Why should a user care if the phase reconstruction is inadequate, as long as the final image reconstruction is good enough?  Does the poorer phase reconstruction affect the amplitude reconstruction? - Daniel's argument.}\textcolor{blue}{Wouldn't this depend on the sample - i.e. for certain objects (phase objects, like bio stuff), the phase reconstruction is more important than the amplitude reconstruction? Matt mentioned that for some of the nanoparticle samples they look at, the phase image has better constrast. I don't think we have a complete answer to the second question, though in some cases at least we're seeing the combination of bad phase reconstruction + good amplitude reconstruction. My understanding of Daniel's point was that uniform phase shifts (over the entire phase image reconstruction) don't matter -- and not necessarily that the phase image itself doesn't matter. }
+
+
+% \begin{figure}%
+%     \centering
+%     \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi_experimental.png} }}%
+%     \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi_experimental.png} }}%
+%     \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi_experimental.png} }}%
+% \vfill
+%     \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth_experimental.png} }}%
+%     \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN_experimental.png} }}%
+%     \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
+%     \caption{Reconstruction comparison, experimentally-derived data}%
+%     \label{fig:exp_comparison_detailed}%
+% \end{figure}
+
+\begin{sidewaysfigure}%
+    \centering
+    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=5.5cm]{figures/experimental/gt_phi_experimental.png} }}%
+    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=5.5cm]{figures/experimental/PtychoNN_phi_experimental.png} }}%
+    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=5.5cm]{figures/experimental/PtychoPINN_phi_experimental.png} }}%
+\vfill
+    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=5.5cm]{figures/experimental/ground_truth_experimental.png} }}%
+    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=5.5cm]{figures/experimental/ptychoNN_experimental.png} }}%
+    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=5.5cm]{figures/experimental/PINN_experimental.png} }}%
+    \caption{Reconstruction comparison, experimentally-derived data}%
+    \label{fig:exp_comparison_detailed}%
+\end{sidewaysfigure}
+
+\subsubsection{Ablation study}
+
+To better understand the specific aspects of PtychoPINN architecture that contribute to its improved performance, we conducted an ablation study evaluating the impact of PINN-based training and real-space constraints. The comparison of reconstruction accuracy (MAE), resolution (Fourier ring correlation, FRC), and peak signal-to-noise ratio (PSNR) in Table \ref{tab1} suggests that the combination of overlap constraints and PINN structure is the most significant factor in improving performance. (\emph{Combination} is an important qualifier, as neither the PINN architecture nor the overlap constraints yields a substantial improvement in reconstruction accuracy when used individually.)
+% TODO language, elaborate
+
+\subsubsection{Out-of-sample generalization}
+To complement these standard evaluation metrics we tested PtychoPINN's out-of-sample generalization. For this purpose, we extracted two distinct $392 \times 392$ patches from a larger image and used just one patch for training both the PtychoPINN model and the baseline model (Figure \ref{fig:gen_detailed}).
+
+In order to provide a rigorous test of the models' out-of-sample performance, we intentionally selected two image patches with considerable divergence in their features. This choice of markedly different images creates a more stringent test of out-of-sample behavior than the other datasets that we have presented.
+
+By comparing the models' reconstructions of the first (in-sample) and second (out-of-sample) patches, we can assess their out-of-sample generalizability. As depicted in Fig. \ref{fig:gen_detailed}, the comparison of panels (c) and (f) (representing PtychoPINN) to panels (b) and (e) (representing the baseline - PtychoNN - model) demonstrates a significantly smaller out-of-sample deterioration in reconstruction quality for PtychoPINN, which suggests that our proposed model exhibits improved generalizability compared to the baseline. The respective numerical comparison (Table \ref{tab2}) supports this assertion. Although both approaches, not surprisingly, perform less well on out-of-sample reconstructions, and the performance loss is more dramatic in FRC50 (resolution) metric then in PSNR metric, PtychoPINN performs significantly better (nearly two-fold better on FRC50) than the baseline model. 
+%By examining each model's reconstruction of the first (in-sample) and second (out-of-sample) patches we can qualitatively judge the two models' out-of-sample generalization. The comparison of Fig. \ref{fig:gen_detailed} (c) and (f) (ours) to Fig. \ref{fig:gen_detailed} (b) and (e) (baseline) shows a much smaller out-of-sample degradation in reconstruction quality for PtychoPINN. 
+
+
+% a composition of lines by PtychoNN, a basic PINN, and PtychoPINN, with all three models trained on the same GRF dataset. While the basic PINN and PtychoPINN both recover recognizable line features, PtychoNN produces objects that are quasi-reproductions of the GRF morphology, with no recovery of details smaller than the probe dimension. 
+
+\subsection{Discussion}
+In summary, we present an unsupervised learning approach for scanning coherent diffraction imaging (CDI) that integrates real-space constraints with a physics-informed neural network (PINN) architecture (PtychoPINN) to yields substantial improvements in reconstruction accuracy and resolution while preserving the inherent speed of the previous NN-based approaches. 
+
+%\emph{outline of transition paragraph}
+%\begin{itemize}
+%\item The main purpose of this transition is to introduce the notion that we're going to present a perspective of the model that emphasizes model properties that a domain scientist looking to put the model to practical use would be interested in. 
+%\item For each of these properties, we will also try to understand \emph{why} the model has that property, from the point of an ML person interested in the underlying mechanics. 
+%\item The properties are: unsupervised trainning, generalization,  and resolution / accuracy.
+%\end{itemize}
+
+In the ensuing discussion, our primary objective is to highlight features of PtychoPINN  that would be most important to a domain scientist intending to deploy it for applications. When possible, we will also take the perspective of a machine-learning researcher to understand \emph{why} PtychoPINN exhibits these characteristics. We specifically concentrate on three essential attributes: unsupervised training, generalizability, and the interplay between resolution and accuracy.
+
+\subsubsection{Unsupervised training} 
+Unsupervised training provides three critical advantages over supervised learning methods for experimental deployment. The requirement of labeled data forces an experimenter to acquire several ptychographic datasets AND reconstruct the real-space image through iterative methods, before a faster NN-based method can be deployed.  The need for labeled training data also hinders on-the- fly retraining and update of the model. The resulting ability to train on a corpus of training samples drawn from a similar distribution as the test-time samples curtails the risks of any problems in out-of-distribution generalization that a model might suffer from. These advantages are particularly valuable in real-time experimental settings.  Finally, diversity of images types in the labeled training data introduces bias, and makes the model less robust.  This drawback is addressed further below.
+
+
+\subsubsection{Generalizability} \label{sec_generalization}
+
+\begin{sidewaysfigure}%
+    \centering
+    \subfloat[\centering Ground truth]{{\includegraphics[height=4cm]{figures/generalizability_gt.png} }}%
+    \subfloat[\centering PtychoNN]{{\includegraphics[height=4cm]{figures/generalizability_PtychoNN.png} }}%
+    \subfloat[\centering PINN]{{\includegraphics[height=4cm]{figures/generalizability_PINN.png} }}%
+    \subfloat[\centering PtychoPINN]{{\includegraphics[height=4cm]{figures/generalizability_PtychoPINN.png} }}%
+    
+    \caption{\emph{Cross-training comparison.} Several models are first trained on locally-symmetric GRF objects, then reconstruct strongly-contrasting, asymmetric compositions of lines. The supervised model (b) struggles to reconstruct oriented features while the PINN -- both without (c) and with (d) ptychographic overlap constraints -- fares better.}
+\label{fig:gen}%
+\end{sidewaysfigure}
+
 \begin{table}[h]
 \begin{center}
 \caption{Numerical study of out-of-sample robustness corresponding to the data of Figure \ref{fig:gen_detailed}.}\label{tab2}%
@@ -406,108 +462,28 @@ PINN,overlaps\footnotemark[2]
 \end{center}
 \end{table}
 
-Figure \ref{fig:sim_comparison} presents a comparison of the reconstruction of artificially generated objects (from the `lines' data type of Fig. \ref{fig:datasets}) using PtychoPINN and the supervised learning baseline, PtychoNN. In these reconstructions, PtychoPINN demonstrates little noticeable degradation in the real-space amplitude and phase. In contrast, the supervised learning baseline shows substantial blurring. The 50 percent threshold of the amplitude Fourier ring correlation (FRC50), a useful measure of linear resolution, is $50~\mathrm{pixel}^{-1}$ for the baseline and a considerably improved $170~\mathrm{pixel}^{-1}$ for PtychoPINN. Furthermore, the peak signal-to-noise ratio (PSNR), a standard metric for reconstruction quality in the super-resolution literature, is 10.3 dB higher for PtychoPINN. 
-
-In order to explore the performance of the model across diverse data, we extended the evaluation to include two additional object types: those derived from Gaussian random field (GRF) generated objects and experimental measurements (Table \ref{tab1}). For the GRF dataset, improvements in both PSNR and FRC50 were relatively modest compared to the improvements seen in the line dataset. It should be noted, however, that the GRF dataset has a smaller dynamic range and lacks sharp features, which simplifies the reconstruction task.
-
-Fig. \ref{fig:exp_comparison_detailed}, we see that both PtychoPINN and PtychoNN yield good amplitude reconstructions of the experimental object. Yet, the baseline's satisfactory amplitude reconstruction stands in contrast to its more limited recovery of the phase image (FRC50 of $51~\mathrm{pixel}^{-1}$ and $5~\mathrm{pixel}^{-1}$, respectively for PtychoPINN and baseline). While both methods have some difficulty reconstructing the phase in areas of the object with low scattering amplitude, PtychoPINN proves more robust; the baseline model, on the other hand, has a propensity to incorrectly invert the phase in these low-amplitude regions (Fig. \ref{fig:exp_comparison_detailed}(b)).
-
-
-% \begin{figure}%
-%     \centering
-%     \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/gt_phi_experimental.png} }}%
-%     \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoNN_phi_experimental.png} }}%
-%     \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/PtychoPINN_phi_experimental.png} }}%
-% \vfill
-%     \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/ground_truth_experimental.png} }}%
-%     \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/ptychoNN_experimental.png} }}%
-%     \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/PINN_experimental.png} }}%
-%     \caption{Reconstruction comparison, experimentally-derived data}%
-%     \label{fig:exp_comparison_detailed}%
-% \end{figure}
-
-\begin{figure}%
-    \centering
-    \subfloat[\centering Ground truth $\phi$]{{\includegraphics[width=4cm]{figures/experimental/gt_phi_experimental.png} }}%
-    \subfloat[\centering PtychoNN $\phi$]{{\includegraphics[width=4cm]{figures/experimental/PtychoNN_phi_experimental.png} }}%
-    \subfloat[\centering PtychoPINN $\phi$]{{\includegraphics[width=4cm]{figures/experimental/PtychoPINN_phi_experimental.png} }}%
-\vfill
-    \subfloat[\centering Ground truth $A$]{{\includegraphics[width=4cm]{figures/experimental/ground_truth_experimental.png} }}%
-    \subfloat[\centering PtychoNN $A$]{{\includegraphics[width=4cm]{figures/experimental/ptychoNN_experimental.png} }}%
-    \subfloat[\centering PtychoPINN $A$]{{\includegraphics[width=4cm]{figures/experimental/PINN_experimental.png} }}%
-    \caption{Reconstruction comparison, experimentally-derived data}%
-    \label{fig:exp_comparison_detailed}%
-\end{figure}
-
-\subsubsection{Ablation study}
-
-To better understand the specific aspects of PtychoPINN that contribute to its improved performance, we conducted an ablation study evaluating the impact of PINN-based training and real-space constraints. The comparison of reconstruction accuracy (MAE), resolution (Fourier ring correlation, FRC), and peak signal-to-noise ratio (PSNR) in Table \ref{tab1} suggests that the combination of overlap constraints and PINN structure is the most significant factor in improving performance. (\emph{Combination} is an important qualifier, as neither the PINN architecture nor the overlap constraints yields a substantial improvement in reconstruction accuracy when used individually.)
-% TODO language, elaborate
-
-\subsubsection{Out-of-sample generalization}
-To complement these standard evaluation metrics we tested PtychoPINN's out-of-sample generalization. For this purpose, we extracted two distinct $392 \times 392$ patches from a larger image and used just one patch for training both the PtychoPINN model and the baseline model (Figure \ref{fig:gen_detailed}).
-
-In order to provide a rigorous test of the models' out-of-sample performance, we intentionally selected two image patches with considerable divergence in their features. This choice of markedly different images creates a more stringent test of out-of-sample behavior than the other datasets that we have presented.
-
-By comparing the models' reconstructions of the first (in-sample) and second (out-of-sample) patches, we can make a qualitative assessment of their respective out-of-sample generalization properties. As depicted in Fig. \ref{fig:gen_detailed}, the comparison of panels (c) and (f) (representing PtychoPINN) to panels (b) and (e) (representing the baseline model) demonstrates a significantly smaller out-of-sample deterioration in reconstruction quality for PtychoPINN, which suggests that our proposed model exhibits improved generalization ability compared to the baseline. The respective numerical comparison (Table \ref{tab2}) supports this assertion, displaying a smaller drop in PSNR between the training and out-of-sample data for PtychoPINN. However, it should be noted that both PtychoPINN and the baseline experience a roughly two-fold reduction in FRC50.
-%By examining each model's reconstruction of the first (in-sample) and second (out-of-sample) patches we can qualitatively judge the two models' out-of-sample generalization. The comparison of Fig. \ref{fig:gen_detailed} (c) and (f) (ours) to Fig. \ref{fig:gen_detailed} (b) and (e) (baseline) shows a much smaller out-of-sample degradation in reconstruction quality for PtychoPINN. 
-
-
-% a composition of lines by PtychoNN, a basic PINN, and PtychoPINN, with all three models trained on the same GRF dataset. While the basic PINN and PtychoPINN both recover recognizable line features, PtychoNN produces objects that are quasi-reproductions of the GRF morphology, with no recovery of details smaller than the probe dimension. 
-
-\subsection{Discussion}
-We have presented PtychoPINN, an unsupervised learning approach for scanning coherent diffraction imaging (CDI) that integrates real-space constraints with a physics-informed neural network (PINN) architecture. This framework yields substantial improvements in reconstruction accuracy and resolution while preserving the inherent speed of NN-based reconstruction. 
-
-%\emph{outline of transition paragraph}
-%\begin{itemize}
-%\item The main purpose of this transition is to introduce the notion that we're going to present a perspective of the model that emphasizes model properties that a domain scientist looking to put the model to practical use would be interested in. 
-%\item For each of these properties, we will also try to understand \emph{why} the model has that property, from the point of an ML person interested in the underlying mechanics. 
-%\item The properties are: unsupervised trainning, generalization,  and resolution / accuracy.
-%\end{itemize}
-
-In the ensuing discussion, our primary objective is to shed light on the features of our model that would be most intriguing to a domain scientist intending to deploy the model in practical applications. Simultaneously, we aim to decipher \emph{why} our model exhibits these characteristics, adopting the perspective of a machine learning investigator with an interest in the underlying mechanics. We specifically concentrate on three essential attributes: unsupervised training, generalization, and the interplay between resolution and accuracy.
-
-\subsubsection{Unsupervised training} 
-Unsupervised training provides numerous advantages over supervised learning methods. Key benefits include the ease of gathering training data and the capability to conduct model updates on the fly. The resulting ability to train on a corpus of training samples drawn from a similar distribution as the test-time samples curtails the risks of any problems in out-of-distribution generalization that a model might suffer from. These advantages are particularly valuable in real-time experimental settings.
-
-\subsubsection{Generalisation} \label{sec_generalization}
-
-\begin{figure}%
-    \centering
-    \subfloat[\centering Ground truth]{{\includegraphics[width=4cm]{figures/generalizability_gt.png} }}%
-    \subfloat[\centering PtychoNN]{{\includegraphics[width=4cm]{figures/generalizability_PtychoNN.png} }}%
-    \subfloat[\centering PINN]{{\includegraphics[width=4cm]{figures/generalizability_PINN.png} }}%
-    \caption{Comparison of the simplified PINN (without overlap constraints) and PtychoPINN, both trained on Gaussian random field (GRF) objects and tested on compositions of randomly-oriented lines.}
-\label{fig:gen}%
-\end{figure}
-
-% Moreover, our numerical experiments demonstrate what we believe to be an inherent advantage of PINN architectures: improved generalization. We find that the basic PINN without overlap constraints displays superior out-of-sample generalization compared to the standard supervised learning approach (Figure \ref{fig:gen}).
-
-% We attribute this improved generalization to the PINN structure. The structure requires the inverse map $G(X)$ to learn diffraction physics, facilitated by its connection to the far-field diffraction map $F_d$ and diffraction-space loss function $L$. This connection ensures a level of physical consistency between the real-space reconstruction and the measured diffraction. In contrast, supervised training often leads to breaches of even coarse conservation laws, such as the unitarity of the Fourier Transform.
-
-
-
 %\subsubsection{Generalization}
 
-\begin{figure}%
+\begin{sidewaysfigure}%
     \centering
-    \subfloat[\centering Ground truth, training]{{\includegraphics[width=4cm]{figures/generalization/gen_gt_train.png} }}%
-    \subfloat[\centering baseline, in-sample ]{{\includegraphics[width=4cm]{figures/generalization/gen_ptychoNN_train.png} }}%
-    \subfloat[\centering ours, in-sample]{{\includegraphics[width=4cm]{figures/generalization/gen_ptychoPINN_train.png} }}%
+    \subfloat[\centering Ground truth, training]{{\includegraphics[width=5cm]{figures/generalization/gen_gt_train.png} }}%
+    \subfloat[\centering baseline (PtychNN), in-sample ]{{\includegraphics[width=5cm]{figures/generalization/gen_ptychoNN_train.png} }}%
+    \subfloat[\centering \textcolor{red}{PtychoPINN}, in-sample]{{\includegraphics[width=5cm]{figures/generalization/gen_ptychoPINN_train.png} }}%
 \vfill
-    \subfloat[\centering Ground truth, out-of-sample]{{\includegraphics[width=4cm]{figures/generalization/gen_gt_test.png} }}%
-    \subfloat[\centering baseline, out-of-sample]{{\includegraphics[width=4cm]{figures/generalization/gen_ptychoNN_test.png} }}%
-    \subfloat[\centering ours, out-of-sample]{{\includegraphics[width=4cm]{figures/generalization/gen_ptychoPINN_test.png} }}%
+    \subfloat[\centering Ground truth, out-of-sample]{{\includegraphics[width=5cm]{figures/generalization/gen_gt_test.png} }}%
+    \subfloat[\centering baseline, out-of-sample]{{\includegraphics[width=5cm]{figures/generalization/gen_ptychoNN_test.png} }}%
+    \subfloat[\centering \textcolor{red}{PtychoPINN}, out-of-sample]{{\includegraphics[width=5cm]{figures/generalization/gen_ptychoPINN_test.png} }}%
     \caption{Generalisation comparison between PtychoPINN and baseline (PtychoNN). Both models are trained on data derived from amplitude object (a). The trained models then reconstruct both the training image ((b) and (c)) and an out-of-sample image ((e) and (f)). All images are of real-space amplitudes; associated phase objects are not shown.  }%
     \label{fig:gen_detailed}%
-\end{figure}
+\end{sidewaysfigure}
 
 
-Additionally, we find that the PINN architecture has another inherent advantage: superior generalization. Even a basic PINN, stripped of overlap constraints, exhibits superior out-of-sample generalization compared to the supervised learning baseline, as shown in Figure \ref{fig:gen}. This advantage becomes more pronounced when comparing generalization of the full PtychoPINN with that of the latter, as in Figure \ref{fig:gen_detailed}. 
+PtychoPINN architecture has another inherent advantage: superior generalizability. Even a basic PINN, stripped of overlap constraints, exhibits superior out-of-sample generalization compared to the supervised learning baseline, as shown in Figure \ref{fig:gen}. This advantage becomes more pronounced when comparing generalizability of the full PtychoPINN with that of the latter, as in Figure \ref{fig:gen_detailed}. \textcolor{red}{We should say how an experimenter benefits from this - that is our primary goal in this exposition.}
 % \textcolor{red}{sentence here on the second generalization study, fig. \ref{fig:gen_detailed}}
-We attribute this to the PINN structure, which necessitates the inverse map $G(X)$ to learn diffraction physics through its connection to the far-field diffraction map $F_d$ and diffraction-space loss function $L$. This connection enforces an approximation of physical consistency between the real-space reconstruction and the measured diffraction. Conversely, supervised training typically leads to violations of even basic conservation rules, such as the FT's unitarity (i.e., $\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and $\bar{y} \equiv F_c(G(x))$).
 
-Furthermore, given that $\hat{x} = F_d(\bar{y})$ is not bijective and the loss function does not directly rely on $\bar{y}$, the PINN structure inherently overlooks variations in real-space structure that the diffraction measurement can't discern. Conversely, supervised training is susceptible to wasting model capacity by memorizing the training data's real-space structure. All told, supervised learning approaches face challenges in generalization due to the difficult task of reconstructing an \emph{a priori} arbitrary map $X \rightarrow Y$ with less guidance by useful inductive biases.
+We attribute PtychoPINN's superior generalizability to the PINN structure, which necessitates the inverse map $G(X)$ to learn diffraction physics through its connection to the far-field diffraction map $F_d$ and diffraction-space loss function $L$. This connection enforces an approximation of physical consistency between the real-space reconstruction and the measured diffraction. Conversely, supervised training typically leads to violations of even basic conservation rules, such as the FT's unitarity (i.e., $\lVert x \rVert \approx \lVert F_c(G(x)) \rVert = \lVert F_d(\bar{y}) \rVert = \lVert \hat{x} \rVert$, by Parseval's identity and $\bar{y} \equiv F_c(G(x))$). \textcolor{red}{I wonder how much is the difference between ground truth and PtychoPINN for out-of-sample comes from limited Q range and high Q noise.  Would ePIE do better?}
+
+Furthermore, given that $\hat{x} = F_d(\bar{y})$ is not bijective and the loss function does not directly rely on $\bar{y}$, the PINN structure inherently overlooks variations in real-space structure that the diffraction measurement can't discern. Conversely, supervised training is susceptible to wasting model capacity by memorizing the training data's real-space structure. All told, supervised learning approaches face challenges in generalizability due to the difficult task of reconstructing an \emph{a priori} arbitrary map $X \rightarrow Y$ with less guidance by useful inductive biases.
 
 % Moreover, since $\hat{x} = F_d(\bar{y})$ is not a bijection and the loss function does not directly depend on $\bar{y}$, the PINN structure inherently disregards differences in real-space structure that are undetectable in the diffraction measurement. Conversely, supervised training is susceptible to wasting model capacity by memorizing the training data's real-space structure. All told, supervised learning approaches face challenges in generalization due to the difficult task of reconstructing an \emph{a priori} arbitrary map $X \rightarrow \hat{Y}$ with less guidance by useful inductive biases.
 
@@ -520,14 +496,18 @@ Furthermore, given that $\hat{x} = F_d(\bar{y})$ is not bijective and the loss f
     \label{fig:patches}
 \end{figure}
 
-The advances in reconstruction quality presented by PtychoPINN hold two-fold significance: they bear practical implications for scientific applications, and also offer potential insights into the workings of the model itself. To facilitate a more nuanced understanding of the model, we distinguish between the concepts of \emph{resolution} and \emph{accuracy}.
+ The advances in reconstruction quality presented by PtychoPINN hold two-fold significance: they bear practical implications for scientific applications, and also offer potential insights into the workings of the model itself. To facilitate a more nuanced understanding of the model, we distinguish between the concepts of \emph{resolution} and \emph{accuracy}.
 
-Resolution, while a critical component of good reconstruction, is not alone sufficient. By comparing $32 \times 32$ reconstruction patches from PtychoPINN, PtychoNN, and a basic PINN (Figure \ref{fig:patches}), we observe that the basic PINN's reconstruction of line features displays a sharpness on par with PtychoPINN's. However, in contrast to both PtychoNN and PtychoPINN, the basic PINN misplaces these features. This arises due to the far field diffraction forward map's invariance to coordinate inversion, meaning real-space objects $O(r)$ and $O(-r)$ yield identical diffraction amplitudes. Thus, the basic PINN fails to distinguish between reconstruction pairs that are mirror images, or chiral, to each other.
-\footnote{It might be worthwhile to make a distinction between local resolution - resolution within a single solution region - and the overall resolution in an image that has been composed from multiple reconstruction patches. The term 'resolution', as used in this context, specifically refers to the former.
+Resolution, while a critical component of good reconstruction, is not sufficient. By comparing $32 \times 32$ reconstruction patches from PtychoPINN, PtychoNN, and a basic PINN (Figure \ref{fig:gen})\textcolor{red}{Is Fig. 7 needed?  Wouldn't this be visible in Fig. 5 if we an additional panel with ptychopinn reconstruction?}\textcolor{blue}{partially done - added a panel to Fig. 5. Unsure how to make this particular argument using Fig. 5 instead of Fig. 7, waiting until after we discuss before touching the text.}, we observe that the basic PINN's reconstruction of line features displays a sharpness on par with PtychoPINN's. However, in contrast to both PtychoNN and PtychoPINN, the basic PINN misplaces these features. This arises due to the far field diffraction forward map's invariance to coordinate inversion.  In other words, real-space objects $O(r)$ and $O(-r)$ yield identical diffraction amplitudes. Thus, the basic PINN fails to distinguish between reconstruction pairs that are mirror images, or chiral, to each other.
 
-Local resolution pertains to the detail and sharpness within individual reconstruction patches, while overall resolution refers to the reconstruction of features across the entire stitched-together image. The latter requires correct $O(r) / O(-r)$ parity within individual reconstruction patches, a more stringent condition.}
 
-This PINN structure undoubtedly contributes a substantial enhancement to resolution, but it doesn't correspondingly boost \emph{accuracy}. In contrast, the inclusion of real-space overlap constraints in PtychoPINN overcomes the degeneracy linked with pairs of coordinate inversion-equivalent candidate objects. This leads to PtychoPINN's large enhancement in the accuracy of reconstruction -- however, it's worth emphasizing that this improvement primarily results from the correct alignment of high-spatial frequency features, and not from an increase in the amount of underlying image information.
+%The term `resolution', as used in this context, specifically refers to the former. Local resolution pertains to the detail and sharpness within individual reconstruction patches while overall, global resolution -- which we call accuracy -- refers to the reconstruction of features across the entire stitched-together image. Accuracy (i.e. global resolution) requires correct $O(r) / O(-r)$ parity within individual reconstruction patches, a more stringent condition.
+
+% \footnote{It might be worthwhile to make a distinction between local resolution - resolution within a single solution region - and the overall resolution in an image that has been composed from multiple reconstruction patches. The term 'resolution', as used in this context, specifically refers to the former.
+
+% Local resolution pertains to the detail and sharpness within individual reconstruction patches, while overall resolution \textcolor{red}{- are we calling this accuracy? - }refers to the reconstruction of features across the entire stitched-together image. The latter requires correct $O(r) / O(-r)$ parity within individual reconstruction patches, a more stringent condition.}
+
+It is worthwhile here to make a distinction between local resolution - resolution within a single solution region - and overall resolution in an image that has been composed from multiple reconstruction patches. Local resolution pertains to the detail and sharpness within individual reconstruction patches, while reconstruction accuracy pertains to the entire stitched-together image. The latter requires correct $O(r) / O(-r)$ parity within individual reconstruction patches, a more stringent condition.The PINN architecture undoubtedly contributes a substantial enhancement to resolution, but it doesn't correspondingly boost \emph{accuracy}. The inclusion of real-space overlap constraints in PtychoPINN is needed to overcomes the degeneracy linked with pairs of coordinate inversion-equivalent candidate objects, and leads to PtychoPINN's large enhancement in the accuracy of reconstruction.  However, it's worth emphasizing that this improvement primarily comes from the correct alignment of high-spatial frequency features, and not from an increase in the amount of information underlying individual images.% why 'individual'?
 
 
 % Discussion outline (from before we changed the structure of this section)
@@ -574,14 +554,9 @@ This PINN structure undoubtedly contributes a substantial enhancement to resolut
 
 
 \section{Conclusion}
-%\begin{itemize}
-%\item Sketch out areas of future improvement / exploration. Position correction; regularization; probablistic approaches to develop calibrated uncertainty quantification and better robustness. \emph{Interpretability} will also be an interesting aspect to explore, as it could give insight into the underlying mechanics of the more surprising aspects of the behavior of this new model / class of models.
-%\item add a discussion of robustness benefits of the NLL loss
-%\end{itemize}
-In this paper we developed an approach to the reconstruction of scanning CDI that combines the benefits of a PINN autoencoder formalism with those of physics-informed constraints. Through a series of numerical experiments we find that this method offers comparable speed and drastically improved accuracy, resolution and generalizability compared to existing deep learning-based approaches to CDI reconstruction. 
+In conclusion, PtychoPINN combines the benefits of a PINN autoencoder formalism with those of physics-informed constraints to produce a method that dramatically enhances the reconstruction speed in comparison to iterative methods and offers significantly improved accuracy, resolution and generalizability compared to existing deep learning-based approaches to lensless imaging.  Furthermore, no requirement for labeled data and the ability to retrain the model on-the-fly provides a practical tool to an experimenter to image a complex object at resolution unattainable with lens in nearly real-time. 
 
-In future work we hope to explore the integration of probabilistic approaches to both correct experimental uncertainties (such as probe jitter) and lay a foundation for uncertainty quantification and further improvements in model robustness. Furthermore, the role of the negative log-likelihood (NLL) loss function in our model warrants exploration, as initial studies indicate that it contributes markedly to the reconstruction quality in photon-limited scenarios. This raises the significance of an appropriate choice of loss function in deep learning approaches, especially those that aim to incorporate physical principles. 
-
+ Additionally, the role of loss function in our model warrants exploration, as preliminary studies indicate that it contributes markedly to the reconstruction quality in photon-limited scenarios. This raises the significance of an appropriate choice of loss function, not only for psychographic reconstruction, but in deep learning approaches in general, especially those that aim to incorporate physical principles. Experimental uncertainties, such as probe and stage jitter, also degrade reconstruction quality. Integration of probabilistic approaches to reconstruction both further increase the reconstruction quality and lay a foundation for extraction realistic model uncertainty that can guide an experimenter to appropriate additional measurements and even modification of data collection geometry to achieve even higher quality reconstructions.  
 
 %\section{Conclusion}\label{sec13}
 
@@ -627,51 +602,6 @@ In future work we hope to explore the integration of probabilistic approaches to
 
 
 
-%\begin{table}[h]
-%\begin{center}
-%\caption{Three reconstruction metrics for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets (lines, GRF and experimental). The metrics are mean absolute error (MAE), peak signal to noise (PSNR), and the 50 percent threshold of the Fourier ring correlation (FRC50) }\label{tab3}%
-%\begin{tabular}{p{2cm}l|ll|ll|ll}
-%\toprule 
-%    & \multicolumn{1}{c}{} & \multicolumn{2}{c}{experimental} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{lines}\\
-%    \midrule
-%    &
-%    & $A$ & $\phi$
-%    & $A$ & $\phi$
-%    & $A$ & $\phi$ \\
-%    \midrule
-%$\{\}$ \footnotemark[1]    
-%& MAE & 0.00394 & 0.542 & 0.0181 & 0.0458 & 0.0245 & 0.13 \\
-%& PSNR & \textbf{92.5} & 50.6 & 80.9 & 71.9 & 40.4 & 62.8 \\
-%& FRC50 & 34 & 5 & 56 & 53 & 51 & 3 \\
-%    \midrule
-%$\{$overlaps$\}$
-%& MAE & \textbf{0.00343} & \textbf{0.549} & \textbf{0.0166} & \textbf{0.0364} & 0.0269 & 0.187 \\
-%& PSNR & 93.9 & 50.4 & \textbf{81.5} & \textbf{74.6} & 41 & 60.3 \\
-%& FRC50 & 39 & 1 & 62 & 6 & 49.5 & 2 \\
-%    \midrule
-%$\{\mathrm{PINN}  \}$
-%& MAE & 0.00598 & 0.495 & 0.0371 & 0.11 & 0.0386 & 0.164 \\
-%& PSNR & 53.8 & 52 & 67 & 65.3 & 65 & 63.2 \\
-%& FRC50 & 8 & 8 & 26 & 6 & 25 & 11.5 \\
-%    \midrule
-%$\{$PINN,~overlaps$\}$
-%& MAE & \textbf{0.00287} & 0.147 & 0.00543 & 0.012 & \textbf{0.00757} & \textbf{0.0208} \\
-%& PSNR & 54.8 & \textbf{60.8} & 80.5 & \textbf{84.5} & \textbf{60.9} & \textbf{79.7} \\
-%& FRC50 & 39 & \textbf{51} & \textbf{94} & \textbf{94} & \textbf{170} & \textbf{173} \\
-%    \bottomrule
-%\end{tabular}
-%\end{center
-
-
-%In this table, we need 
-%a) Additional datasets to test on (can be just one more, but needs to be different). To report the robustness of results.
-%b) Do we have the variation about the mean? Was there significant variation due to the ordering of batches, initializations, etc in repeated experiments?
-% a) is pretty much required.
-
-
-
-
-
 \backmatter
 
 
@@ -700,32 +630,6 @@ In future work we hope to explore the integration of probabilistic approaches to
 % \end{itemize}
 
 
-
-
-
-
-% \begin{table}[h]
-% \begin{center}
-% \caption{Reconstruction accuracy (test MAE) for the baseline NN reconstruction model and several variations of the PINN architecture, repeated for three contrasting datasets. }\label{tab2}%
-% \begin{tabular}{p{2cm}llllll}
-% \toprule 
-%     Model features & \multicolumn{2}{c}{lines} & \multicolumn{2}{c}{GRF} & \multicolumn{2}{c}{experimental}\\
-%     & MAE($A$) & MAE($\phi$)
-%     & MAE($A$) & MAE($\phi$)
-%     & MAE($A$) \\%& MAE($\phi$) \\
-%     \midrule
-% $\{\}$ \footnotemark[1]    & 0.036   & 0.12  & 0.027 & 0.045 & 0.028 \\
-% $\{\mathrm{PINN}  \}$  & 0.036   & 0.077 & 0.049 & 0.088 & 0.039 \\
-% $\{$overlaps$\}$  & 0.025 & 0.19 &  0.020 & 0.033 & 0.027 \\
-% $\{$PINN,~overlaps$\}$   & 0.0077 & 0.019 & 0.0077 & \bf{0.011} & 0.025 \\
-%   $\{$PINN,~NLL$\}$     & 0.043    &   0.18  & 0.049 & 0.12 &  0.038 \\
-%   $\{$PINN,~NLL,\newline
-%  ~~overlaps$\}$     & \bf{0.0076}    &   \bf{0.014}  & \bf{0.0078} & .012 &  \bf{0.022}  \\
-%     \bottomrule
-% \end{tabular}
-% \end{center}
-% \footnotetext[1]{PtychoNN baseline}
-% \end{table}
 
 %%=============================================%%
 %% For submissions to Nature Portfolio Journals %%
