@@ -19,8 +19,9 @@
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{dean2006phase,heintzmann2021answers,miao2015beyond}
 \Newlabel{1}{1}
+\citation{miao1999extending}
 \citation{epie}
-\citation{ratner2021recovering,yao2022autophasenn}
+\citation{ratner2021recovering,yao2022autophasenn,chang2023deep}
 \citation{mitchell1980need,baxter2000model}
 \citation{baker2019workshop}
 \citation{baker2019workshop}
@@ -44,65 +45,72 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Neural network architecture and training configuration of the PtychoPINN model.\relax }}{7}{figure.caption.2}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{diagram}{{1}{7}{Neural network architecture and training configuration of the PtychoPINN model.\relax }{figure.caption.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Representative samples from the three dataset types used in this investigation.\relax }}{7}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:datasets}{{2}{7}{Representative samples from the three dataset types used in this investigation.\relax }{figure.caption.3}{}}
 \citation{kingma2014adam}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Reconstruction comparison, simulated data\relax }}{8}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:sim_comparison}{{3}{8}{Reconstruction comparison, simulated data\relax }{figure.caption.4}{}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth $A$}}}{8}{subfigure.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering PtychoNN $A$}}}{8}{subfigure.3.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PtychoPINN $A$}}}{8}{subfigure.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \emph  {Datasets.} Examples of amplitude images from three distinct dataset types used in this study. The `Lines' and `Fines Features' (Gaussian Random Field - GRF) datasets provide contrasting conditions of local symmetry (i.e., isotropy). The Gaussian random field process produces characteristic speckle, while `Lines' consists of sharp, oriented edges. `Large Features' is anisotropic but coarser than both `Lines' and `Fine Features'.\relax }}{8}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:datasets}{{2}{8}{\emph {Datasets.} Examples of amplitude images from three distinct dataset types used in this study. The `Lines' and `Fines Features' (Gaussian Random Field - GRF) datasets provide contrasting conditions of local symmetry (i.e., isotropy). The Gaussian random field process produces characteristic speckle, while `Lines' consists of sharp, oriented edges. `Large Features' is anisotropic but coarser than both `Lines' and `Fine Features'.\relax }{figure.caption.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparing the characteristics of the three dataset types used in this study.\relax }}{8}{table.caption.4}\protected@file@percent }
+\newlabel{tab:comparison}{{1}{8}{Comparing the characteristics of the three dataset types used in this study.\relax }{table.caption.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Training}{8}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Results and Discussion}{8}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Numerical experiments}{8}{subsection.3.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces caption \relax }}{9}{table.caption.5}\protected@file@percent }
-\newlabel{tab1}{{1}{9}{caption \relax }{table.caption.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Numerical study of out-of-sample robustness corresponding to the data of Figure \ref  {fig:gen_detailed}.\relax }}{9}{table.caption.6}\protected@file@percent }
-\newlabel{tab2}{{2}{9}{Numerical study of out-of-sample robustness corresponding to the data of Figure \ref {fig:gen_detailed}.\relax }{table.caption.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Reconstruction comparison, experimentally-derived data\relax }}{10}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:exp_comparison_detailed}{{4}{10}{Reconstruction comparison, experimentally-derived data\relax }{figure.caption.7}{}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth $\phi $}}}{10}{subfigure.4.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering PtychoNN $\phi $}}}{10}{subfigure.4.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PtychoPINN $\phi $}}}{10}{subfigure.4.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {\centering Ground truth $A$}}}{10}{subfigure.4.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(e)}{\ignorespaces {\centering PtychoNN $A$}}}{10}{subfigure.4.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(f)}{\ignorespaces {\centering PtychoPINN $A$}}}{10}{subfigure.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Ablation study}{10}{subsubsection.3.1.1}\protected@file@percent }
+\citation{millane1990phase}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Results and Discussion}{9}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Numerical experiments}{9}{subsection.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Three reconstruction metrics for the baseline supervised-learning model (PtychoNN) and PtychoPINN, repeated for datasets with contrasting asymmetry and feature sharpness: Lines, GRF and `Large features'. For each combination of dataset (top column header) and reconstruction metric, the best amplitude and phase reconstructions are bolded. Lines, with its sharp, asymmetric features, yields the largest improvements in reconstruction of the amplitude image (bottom left of table). The baseline model recovers large amplitude features quite well (rightmost column), but PtychoPINN is more robust in its phase reconstruction across all datasets. \relax }}{9}{table.caption.6}\protected@file@percent }
+\newlabel{tab1}{{2}{9}{Three reconstruction metrics for the baseline supervised-learning model (PtychoNN) and PtychoPINN, repeated for datasets with contrasting asymmetry and feature sharpness: Lines, GRF and `Large features'. For each combination of dataset (top column header) and reconstruction metric, the best amplitude and phase reconstructions are bolded. Lines, with its sharp, asymmetric features, yields the largest improvements in reconstruction of the amplitude image (bottom left of table). The baseline model recovers large amplitude features quite well (rightmost column), but PtychoPINN is more robust in its phase reconstruction across all datasets. \relax }{table.caption.6}{}}
+\newlabel{RF1}{10}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Representative Amplitude reconstruction comparison for the Lines dataset.\relax }}{10}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:sim_comparison}{{3}{10}{Representative Amplitude reconstruction comparison for the Lines dataset.\relax }{figure.caption.5}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth $A$}}}{10}{subfigure.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering PtychoNN $A$}}}{10}{subfigure.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PtychoPINN $A$}}}{10}{subfigure.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Ablation study}{11}{subsubsection.3.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Out-of-sample generalization}{11}{subsubsection.3.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Discussion}{11}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Unsupervised training}{11}{subsubsection.3.2.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Comparison of the simplified PINN (without overlap constraints) and PtychoPINN, both trained on Gaussian random field (GRF) objects and tested on compositions of randomly-oriented lines.\relax }}{12}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:gen}{{5}{12}{Comparison of the simplified PINN (without overlap constraints) and PtychoPINN, both trained on Gaussian random field (GRF) objects and tested on compositions of randomly-oriented lines.\relax }{figure.caption.8}{}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth}}}{12}{subfigure.5.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering PtychoNN}}}{12}{subfigure.5.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PINN}}}{12}{subfigure.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Generalisation}{12}{subsubsection.3.2.2}\protected@file@percent }
-\newlabel{sec_generalization}{{3.2.2}{12}{Generalisation}{subsubsection.3.2.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Resolution and Accuracy}{12}{subsubsection.3.2.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Generalisation comparison between PtychoPINN and baseline (PtychoNN). Both models are trained on data derived from amplitude object (a). The trained models then reconstruct both the training image ((b) and (c)) and an out-of-sample image ((e) and (f)). All images are of real-space amplitudes; associated phase objects are not shown. \relax }}{13}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:gen_detailed}{{6}{13}{Generalisation comparison between PtychoPINN and baseline (PtychoNN). Both models are trained on data derived from amplitude object (a). The trained models then reconstruct both the training image ((b) and (c)) and an out-of-sample image ((e) and (f)). All images are of real-space amplitudes; associated phase objects are not shown. \relax }{figure.caption.9}{}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth, training}}}{13}{subfigure.6.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering baseline, in-sample }}}{13}{subfigure.6.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering ours, in-sample}}}{13}{subfigure.6.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {\centering Ground truth, out-of-sample}}}{13}{subfigure.6.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(e)}{\ignorespaces {\centering baseline, out-of-sample}}}{13}{subfigure.6.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(f)}{\ignorespaces {\centering ours, out-of-sample}}}{13}{subfigure.6.6}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Comparison of real-space and diffraction reconstructions from PtychoPINN and the simple PINN with no overlap constraints.\relax }}{13}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:patches}{{7}{13}{Comparison of real-space and diffraction reconstructions from PtychoPINN and the simple PINN with no overlap constraints.\relax }{figure.caption.10}{}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering }}}{13}{subfigure.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Conclusion}{14}{section.4}\protected@file@percent }
+\newlabel{RF2}{12}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  \emph  {Amplitude and phase reconstruction.} Comparison of PtychoPINN to a supervised learning method, PtychoNN, on the `Large features' object. As the amplitude object lacks sharp features, PtychoNN reconstructs it nearly as well as PtychoPINN. However, it tends to invert the phase structure in low-amplitude regions.\relax }}{12}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:exp_comparison_detailed}{{4}{12}{\emph {Amplitude and phase reconstruction.} Comparison of PtychoPINN to a supervised learning method, PtychoNN, on the `Large features' object. As the amplitude object lacks sharp features, PtychoNN reconstructs it nearly as well as PtychoPINN. However, it tends to invert the phase structure in low-amplitude regions.\relax }{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth $\phi $}}}{12}{subfigure.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering PtychoNN $\phi $}}}{12}{subfigure.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PtychoPINN $\phi $}}}{12}{subfigure.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {\centering Ground truth $A$}}}{12}{subfigure.4.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(e)}{\ignorespaces {\centering PtychoNN $A$}}}{12}{subfigure.4.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(f)}{\ignorespaces {\centering PtychoPINN $A$}}}{12}{subfigure.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Discussion}{13}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Unsupervised training}{13}{subsubsection.3.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Generalizability}{13}{subsubsection.3.2.2}\protected@file@percent }
+\newlabel{sec_generalization}{{3.2.2}{13}{Generalizability}{subsubsection.3.2.2}{}}
+\newlabel{RF3}{14}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \emph  {Cross-training comparison.} Several models are first trained on locally-symmetric GRF objects, then reconstruct strongly-contrasting, asymmetric compositions of lines. The supervised model (b) struggles to reconstruct oriented features while the PINN -- both without (c) and with (d) ptychographic overlap constraints -- fares better.\relax }}{14}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:gen}{{5}{14}{\emph {Cross-training comparison.} Several models are first trained on locally-symmetric GRF objects, then reconstruct strongly-contrasting, asymmetric compositions of lines. The supervised model (b) struggles to reconstruct oriented features while the PINN -- both without (c) and with (d) ptychographic overlap constraints -- fares better.\relax }{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth}}}{14}{subfigure.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering PtychoNN}}}{14}{subfigure.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PINN}}}{14}{subfigure.5.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {\centering PtychoPINN}}}{14}{subfigure.5.4}\protected@file@percent }
+\newlabel{RF4}{15}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \emph  {Model Generalization.} This presents a comparison of the reconstructions produced by PtychoPINN and the baseline model, PtychoNN. Both models are trained using data derived from the amplitude object depicted in panel (a). Panels (b) and (c) show the training image as reconstructed by PtychoNN and PtychoPINN, respectively. The trained models then reconstruct diffraction from an out-of-sample object (d), resulting in images (e) and (f) for PtychoNN and PtychoPINN, respectively. Both models degrade out-of-sample, but PtychoPINN proves more robust. \relax }}{15}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:gen_detailed}{{6}{15}{\emph {Model Generalization.} This presents a comparison of the reconstructions produced by PtychoPINN and the baseline model, PtychoNN. Both models are trained using data derived from the amplitude object depicted in panel (a). Panels (b) and (c) show the training image as reconstructed by PtychoNN and PtychoPINN, respectively. The trained models then reconstruct diffraction from an out-of-sample object (d), resulting in images (e) and (f) for PtychoNN and PtychoPINN, respectively. Both models degrade out-of-sample, but PtychoPINN proves more robust. \relax }{figure.caption.10}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {\centering Ground truth, training}}}{15}{subfigure.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {\centering baseline (PtychoNN), in-sample }}}{15}{subfigure.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {\centering PtychoPINN, in-sample}}}{15}{subfigure.6.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(d)}{\ignorespaces {\centering Ground truth, out-of-sample}}}{15}{subfigure.6.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(e)}{\ignorespaces {\centering baseline (PtychoNN), out-of-sample}}}{15}{subfigure.6.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(f)}{\ignorespaces {\centering PtychoPINN, out-of-sample}}}{15}{subfigure.6.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Numerical study of out-of-sample robustness corresponding to the data of Figure \ref  {fig:gen_detailed}.\relax }}{16}{table.caption.9}\protected@file@percent }
+\newlabel{tab2}{{3}{16}{Numerical study of out-of-sample robustness corresponding to the data of Figure \ref {fig:gen_detailed}.\relax }{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Resolution and Accuracy}{16}{subsubsection.3.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Conclusions}{17}{section.4}\protected@file@percent }
 \bibdata{ptycho-pinn}
 \bibcite{dean2006phase}{{1}{2006}{{Dean et~al.}}{{}}}
 \bibcite{heintzmann2021answers}{{2}{2021}{{Heintzmann}}{{}}}
 \bibcite{miao2015beyond}{{3}{2015}{{Miao et~al.}}{{}}}
-\bibcite{epie}{{4}{2009}{{Maiden and Rodenburg}}{{}}}
-\bibcite{ratner2021recovering}{{5}{2021}{{Ratner et~al.}}{{}}}
-\bibcite{yao2022autophasenn}{{6}{2022}{{Yao et~al.}}{{}}}
-\bibcite{mitchell1980need}{{7}{1980}{{Mitchell}}{{}}}
-\bibcite{baxter2000model}{{8}{2000}{{Baxter}}{{}}}
-\bibcite{baker2019workshop}{{9}{2019}{{Baker et~al.}}{{}}}
-\bibcite{miao2000oversampling}{{10}{2000}{{Miao et~al.}}{{}}}
-\bibcite{cherukara2020ai}{{11}{2020}{{Cherukara et~al.}}{{}}}
-\bibcite{kingma2014adam}{{12}{2014}{{Kingma and Ba}}{{}}}
-\bibcite{adams1944mount}{{13}{1944}{{Adams}}{{}}}
-\gdef \@abspage@last{16}
+\bibcite{miao1999extending}{{4}{1999}{{Miao et~al.}}{{}}}
+\bibcite{epie}{{5}{2009}{{Maiden and Rodenburg}}{{}}}
+\bibcite{ratner2021recovering}{{6}{2021}{{Ratner et~al.}}{{}}}
+\bibcite{yao2022autophasenn}{{7}{2022}{{Yao et~al.}}{{}}}
+\bibcite{chang2023deep}{{8}{2023}{{Chang et~al.}}{{}}}
+\bibcite{mitchell1980need}{{9}{1980}{{Mitchell}}{{}}}
+\bibcite{baxter2000model}{{10}{2000}{{Baxter}}{{}}}
+\bibcite{baker2019workshop}{{11}{2019}{{Baker et~al.}}{{}}}
+\bibcite{miao2000oversampling}{{12}{2000}{{Miao et~al.}}{{}}}
+\bibcite{cherukara2020ai}{{13}{2020}{{Cherukara et~al.}}{{}}}
+\bibcite{kingma2014adam}{{14}{2014}{{Kingma and Ba}}{{}}}
+\bibcite{millane1990phase}{{15}{1990}{{Millane}}{{}}}
+\gdef \@abspage@last{19}
